@@ -1,136 +1,56 @@
-# Simulator Group
+# PUK ESP32 DAC ECU Simulator — 10 Variants
 
-โครงการพัฒนา **ECU Simulator แบบ Stand Alone** สำหรับสร้างและควบคุมสัญญาณจำลองของเครื่องยนต์ โดยมีเป้าหมายเพื่อลดการพึ่งพาโปรแกรมที่เชื่อมต่อผ่าน COM Port และทำให้กล่อง Simulator สามารถควบคุมผ่าน Interface ที่ใช้งานง่ายขึ้น
+ชุดโปรแกรม ECU Simulator สำหรับ ESP32 ที่มี DAC ภายใน 2 ช่อง รองรับทั้ง **Stand-alone 5 แบบ** และ **Wi‑Fi Web Application 5 แบบ** พร้อมระบบตรวจประสิทธิภาพบอร์ด (Board Health / Self-Test)
 
-> สถานะปัจจุบัน: เอกสารเริ่มต้นของโครงการ ยังไม่มีผลยืนยันการทดสอบกับ ECU จริงใน repository นี้
+## สิ่งที่มีในรุ่น v0.1.0
 
-## เป้าหมายของโครงการ
+- Build Environment 10 รูปแบบ
+- CKP/CMP ตัวอย่าง Generic 36-1
+- MAP/TPS analog output ผ่าน ESP32 DAC GPIO25/26
+- Stand-alone control ด้วยปุ่มและ Potentiometer
+- Web App ผ่าน ESP32 Access Point ไม่ต้องใช้ COM Interface ตอนใช้งาน
+- ALL OFF เมื่อสั่งหยุดหรือ Web client timeout
+- Board Self-Test: DAC feedback, timing jitter, heap, Wi‑Fi และ reset/watchdog
+- เอกสาร Wiring, Variant matrix, Health criteria และ Test record
 
-- พัฒนา ECU Simulator ให้ทำงานแบบ Stand Alone
-- เปลี่ยนหรือเพิ่มช่องทางเชื่อมต่อแทน COM Interface เดิม
-- รองรับการเลือก Engine Profile จากข้อมูลที่กำหนด
-- สร้างสัญญาณ CKP และ CMP ตามรูปแบบเครื่องยนต์
-- ควบคุมสัญญาณ IGT, IGF, Injector และเซนเซอร์จำลอง
-- แสดงสถานะการเชื่อมต่อและค่าการทำงานแบบ Real-time
-- มีปุ่มหยุดการทำงานและปิด Output ทั้งหมดอย่างปลอดภัย
-- รองรับการเพิ่มเครื่องยนต์หรือ ECU รุ่นใหม่ในอนาคต
+## เริ่มต้น
 
-## ขอบเขตระบบที่วางแผนไว้
+1. ติดตั้ง VS Code + PlatformIO
+2. เปิดโฟลเดอร์นี้
+3. เลือก Environment จาก `platformio.ini`
+4. Build และ Upload
+5. อ่าน [Wiring](docs/WIRING.md) ก่อนต่ออุปกรณ์
 
-### Signal Generation
+Web mode:
 
-- CKP (Crankshaft Position)
-- CMP (Camshaft Position)
-- IGT (Ignition Trigger)
-- IGF (Ignition Feedback)
-- Injector Signal
+1. เชื่อม Wi‑Fi `PUK_SIM_6` ถึง `PUK_SIM_10`
+2. Password: `puk-sim-32`
+3. เปิด `http://192.168.4.1`
 
-### Analog Sensor Simulation
+Stand-alone:
 
-- MAP
-- TPS
-- ECT
-- IAT
-- O2
-- APP
-- FRP
+- GPIO32: Start/Stop
+- GPIO36: RPM Pot
+- GPIO39: Load/MAP Pot
+- กด GPIO33 ค้างตอน Boot หรือส่ง `T` ผ่าน Serial เพื่อรัน Self-Test
 
-### Communication
+## การตรวจสอบ
 
-ช่องทางเชื่อมต่อจริงต้องยืนยันจากฮาร์ดแวร์และซอร์สโค้ดก่อนเลือกใช้งาน โดยอาจเป็น:
-
-- USB Serial
-- Wi-Fi Access Point และ Web Interface
-- Bluetooth
-- การควบคุมจากหน้าจอและปุ่มบนกล่องโดยตรง
-
-## แนวทางสถาปัตยกรรม
-
-โครงการควรแยกส่วนการทำงานเพื่อให้ง่ายต่อการเพิ่ม Engine Profile และเปลี่ยนช่องทางเชื่อมต่อ:
-
-1. **Engine Profile** — รูปแบบฟัน CKP/CMP, จำนวนสูบ, Firing Order และช่วง RPM
-2. **Signal Engine** — การกำหนดเวลาและสร้างสัญญาณแบบแม่นยำ
-3. **I/O Layer** — การแมปสัญญาณกับขา Timer, DAC, PWM และ CAN
-4. **Control Interface** — ช่องทางสื่อสารระหว่างผู้ใช้กับกล่อง Simulator
-5. **User Interface** — การเลือก Profile, ปรับค่า, Start, Stop และแสดงสถานะ
-6. **Safety Layer** — ปิด Output เมื่อเปิดเครื่องใหม่ หลุดการเชื่อมต่อ หรือเกิด Timeout
-
-## โครงสร้างโครงการที่แนะนำ
-
-```text
-Simulator-Group/
-├── firmware/        # Source code สำหรับ Controller
-├── interface/       # Web, Desktop หรือ Stand-alone UI
-├── hardware/        # Wiring, schematic และข้อมูล Hardware Revision
-├── profiles/        # Engine และ ECU profiles
-├── docs/            # คู่มือใช้งานและเอกสารการพัฒนา
-├── tests/           # Test plan, logs และหลักฐานการทดสอบ
-├── CHANGELOG.md
-└── README.md
+```bash
+python tools/static_check.py
+pio run -e web_dashboard
 ```
 
-## ข้อมูลที่ต้องยืนยันก่อนต่อ ECU จริง
+ดูรายละเอียด [รูปแบบทั้ง 10](docs/VARIANTS.md), [Board Health](docs/BOARD_HEALTH.md) และ [Test Record](docs/TEST_RECORD.md)
 
-- รุ่น Controller และ Hardware Revision
-- ตารางขาที่ใช้งานจริง
-- แรงดันของแต่ละสัญญาณ: 3.3 V, 5 V หรือ 12 V
-- รูปแบบ Output: Open-collector หรือ Push-pull
-- CKP/CMP tooth pattern และความสัมพันธ์ของเฟส
-- Connector orientation และ ECU pinout จากแหล่งข้อมูลที่เชื่อถือได้
-- วงจรป้องกัน, Fuse, Current limit และ Ground reference
-- วิธีเชื่อมต่อที่จะใช้แทน COM Interface
+## คำเตือน
 
-ห้ามต่อ ECU จริงหากยังไม่ยืนยัน Voltage domain, Ground, Pinout และวงจรป้องกัน
+โค้ด CKP/CMP เป็น **Generic demonstration profile** เท่านั้น ไม่ใช่ข้อมูลของ ECU รุ่นใดรุ่นหนึ่ง ต้องยืนยัน Tooth pattern, phase, voltage level, Pinout และวงจรป้องกันก่อนต่อ ECU จริง ห้ามต่อสัญญาณ 12 V เข้าขา ESP32 โดยตรง
 
-## ระดับการตรวจสอบ
+## Verification status
 
-สถานะของแต่ละ Release ต้องระบุให้ชัดเจน:
+- Static project checks: **PASS**
+- PlatformIO compile: **ยังไม่ได้ยืนยันใน environment นี้**
+- Oscilloscope/logic analyzer: **ยังไม่ได้ทดสอบ**
+- ECU bench: **ยังไม่ได้ทดสอบ**
 
-| ระดับ | ความหมาย |
-|---|---|
-| Software verified | ตรวจโค้ดหรือ Compile ผ่าน |
-| Signal verified | วัดสัญญาณด้วย Oscilloscope หรือ Logic Analyzer แล้ว |
-| ECU bench verified | ทดสอบกับ ECU จริงบน Bench พร้อมบันทึกผลแล้ว |
-
-การ Compile ผ่านเพียงอย่างเดียวไม่ถือว่าผ่านการทดสอบกับฮาร์ดแวร์หรือ ECU จริง
-
-## ขั้นตอนการพัฒนา
-
-1. เก็บ Baseline เวอร์ชันล่าสุดที่ใช้งานได้
-2. กำหนดขอบเขตการเปลี่ยนแปลงและ Acceptance Test
-3. ยืนยัน Pinout, Signal level และ Engine pattern
-4. พัฒนา Firmware, Interface และเอกสารให้เป็นเวอร์ชันเดียวกัน
-5. ทดสอบ Software ก่อนจ่ายไฟให้ Hardware
-6. วัด Waveform ด้วยแหล่งจ่ายแบบจำกัดกระแส
-7. ทดสอบ ECU Bench ผ่าน Harness ที่มี Fuse และวงจรป้องกัน
-8. บันทึกผล ข้อจำกัด และหมายเลขเวอร์ชัน
-
-## การติดตั้งและใช้งาน
-
-ยังไม่สามารถระบุคำสั่ง Build, Upload หรือ Launch ได้จนกว่าจะเพิ่มซอร์สโค้ดและยืนยัน Controller ที่ใช้จริง
-
-เมื่อเพิ่มโปรเจ็กต์แล้ว ควรบันทึกข้อมูลต่อไปนี้ในส่วนนี้:
-
-- Board และ FQBN
-- IDE หรือ Toolchain version
-- Library และ Dependency
-- ขั้นตอน Build และ Upload
-- วิธีเชื่อมต่อ Interface
-- ลำดับ Power on, Start, Stop และ Power off
-
-## Roadmap
-
-- [ ] นำซอร์สโค้ดเวอร์ชันล่าสุดเข้า repository
-- [ ] บันทึก Hardware revision และ Wiring table
-- [ ] เลือกช่องทางเชื่อมต่อสำหรับ Stand-alone mode
-- [ ] แยก Engine Profile ออกจาก Signal Engine
-- [ ] เพิ่ม Connection state และ Emergency Stop
-- [ ] เพิ่ม Automated software tests
-- [ ] ตรวจ CKP/CMP waveform
-- [ ] ตรวจ Analog sensor outputs
-- [ ] ทดสอบกับ ECU จริง
-- [ ] จัดทำ Operator guide และ Release manifest
-
-## License
-
-ยังไม่ได้กำหนด License หากเป็นโครงการปิดหรือใช้เชิงพาณิชย์ ไม่ควรเพิ่ม Open-source license จนกว่าเจ้าของโครงการจะอนุมัติ
