@@ -1,0 +1,13 @@
+const fs = require('fs'), assert = require('assert');
+const ino = fs.readFileSync('arduino/PUK_ESP32_Standalone_LCD/PUK_ESP32_Standalone_LCD.ino', 'utf8');
+const wiring = fs.readFileSync('docs/standalone-lcd-wiring.md', 'utf8');
+assert.match(ino, /LiquidCrystal_I2C lcd\(0x27, 20, 4\)/);
+assert.match(ino, /enum class Mode.*ECU_HEALTH/);
+assert.match(ino, /void allOff\(\)/);
+assert.match(ino, /dacWrite\(Pin::DAC_MAP, 0\)/);
+assert.match(ino, /responseCountA > 0 \|\| responseCountB > 0/);
+assert.match(ino, /Grade::NOT_VERIFIED/);
+assert.match(ino, /Limit::RPM_MIN, Limit::RPM_MAX/);
+assert.match(wiring, /level shifter/);
+assert.match(wiring, /ห้ามต่อ injector\/IGT output เข้า ESP32 โดยตรง/);
+console.log('PASS: 9 standalone LCD safety, display, health and wiring checks');
