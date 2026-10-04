@@ -1,0 +1,28 @@
+{
+  "source": "https://chatgpt.com/s/cx_6abe50737f908191a31663a6ba160733",
+  "recoveredOn": "2026-10-03",
+  "method": "Visible DOM diff data-line text, chronological reconstruction; LF newline and final newline normalized",
+  "originalByteIdentityVerified": false,
+  "diffsObserved": 42,
+  "reconstructionDeletionAndContextErrors": 0,
+  "sourceManifest": [
+    {"name":"AppConfig.h","lines":22,"utf16Length":636,"fnv1aUtf16":"27d0bc7b"},
+    {"name":"ESP32_WiFi_StandAlone_Test.ino","lines":23,"utf16Length":523,"fnv1aUtf16":"dde3c53d"},
+    {"name":"README.md","lines":72,"utf16Length":3202,"fnv1aUtf16":"6964f1f2"},
+    {"name":"SignalGenerator.cpp","lines":38,"utf16Length":1305,"fnv1aUtf16":"9cbf566a"},
+    {"name":"SignalGenerator.h","lines":15,"utf16Length":343,"fnv1aUtf16":"819dcc66"},
+    {"name":"SimulatorState.cpp","lines":60,"utf16Length":2289,"fnv1aUtf16":"21bab9e2"},
+    {"name":"SimulatorState.h","lines":25,"utf16Length":567,"fnv1aUtf16":"c29d9ee8"},
+    {"name":"WebInterface.cpp","lines":65,"utf16Length":3164,"fnv1aUtf16":"33324901"},
+    {"name":"WebInterface.h","lines":18,"utf16Length":440,"fnv1aUtf16":"21ad9546"},
+    {"name":"WebPage.h","lines":33,"utf16Length":4566,"fnv1aUtf16":"76ad0420"},
+    {"name":"VehicleProfiles.cpp","lines":59,"utf16Length":2566,"fnv1aUtf16":"3ca48f49"},
+    {"name":"VehicleProfiles.h","lines":21,"utf16Length":452,"fnv1aUtf16":"e5c1e662"},
+    {"name":"HARDWARE_INTERFACE_GUIDE.md","lines":198,"utf16Length":9549,"fnv1aUtf16":"4ce09f19"},
+    {"name":"ESP32_ECU_Interface_Wiring.svg","lines":95,"utf16Length":11647,"fnv1aUtf16":"12219369"},
+    {"name":"CKP_CMP_Interface_Wiring.svg","lines":76,"utf16Length":9838,"fnv1aUtf16":"986aa738"},
+    {"name":"CHANGELOG.md","lines":10,"utf16Length":469,"fnv1aUtf16":"21971fef"}
+  ],
+  "missing": ["Original PNG circuit illustrations: two referenced, original names and binary files not recovered", "Original Git commit object 68b075a and full tree"],
+  "excluded": ["PUK_SIMULATOR_TEST_wifi_profile.xml was created then deleted in source chronology; not restored or imported"]
+}

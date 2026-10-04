@@ -1,0 +1,9 @@
+{
+  "error": "Process-tree termination failed. Close the tool before retrying.",
+  "observedPids": [
+    6760,
+    4552
+  ],
+  "unsafeTermination": true,
+  "log": "2026-10-03 20:17:15Z esptool \"-NoProfile\" \"-ExecutionPolicy\" \"Bypass\" \"-File\" \"C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\process-fixture-ab7bc37a5bd5436ca19aff0dc7e5553d\\helper.ps1\" \"success\"\r\n2026-10-03 20:17:16Z FIXTURE stdout\r\n\r\nFIXTURE stderr\r\n\r\n2026-10-03 20:17:16Z esptool exit code: 0\r\n2026-10-03 20:17:16Z esptool \"-NoProfile\" \"-ExecutionPolicy\" \"Bypass\" \"-File\" \"C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\process-fixture-ab7bc37a5bd5436ca19aff0dc7e5553d\\helper.ps1\" \"failure\"\r\n2026-10-03 20:17:17Z FIXTURE nonzero\r\n\r\n\r\n2026-10-03 20:17:17Z esptool exit code: 7\r\n2026-10-03 20:17:17Z esptool \"-NoProfile\" \"-ExecutionPolicy\" \"Bypass\" \"-File\" \"C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\process-fixture-ab7bc37a5bd5436ca19aff0dc7e5553d\\helper.ps1\" \"timeout\" \"C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\process-fixture-ab7bc37a5bd5436ca19aff0dc7e5553d\\observed\"\r\n2026-10-03 20:17:20Z taskkill exit 1: ERROR: Access denied\r\r\n\r\n"
+}

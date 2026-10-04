@@ -1,0 +1,43 @@
+sequence,label,visibleRows,reconstructionErrors
+1,AppConfig.h +21 -0,21,0
+2,ESP32_WiFi_StandAlone_Test.ino +22 -0,22,0
+3,README.md +59 -0,59,0
+4,SignalGenerator.cpp +38 -0,38,0
+5,SignalGenerator.h +15 -0,15,0
+6,SimulatorState.cpp +54 -0,54,0
+7,SimulatorState.h +24 -0,24,0
+8,WebInterface.cpp +29 -0,29,0
+9,WebInterface.h +16 -0,16,0
+10,WebPage.h +26 -0,26,0
+11,AppConfig.h +3 -3,7,0
+12,SimulatorState.cpp +5 -1,10,0
+13,Edited PUK_SIMULATOR_TEST_wifi_profile.xml +19 -0,19,0
+14,Edited WebInterface.cpp +13 -2,18,0
+15,README.md +7 -0,8,0
+16,SimulatorState.cpp +1 -0,3,0
+17,SimulatorState.h +1 -0,3,0
+18,VehicleProfiles.cpp +59 -0,59,0
+19,VehicleProfiles.h +21 -0,21,0
+20,WebInterface.cpp +3 -0,9,0
+21,WebPage.h +9 -3,23,0
+22,PUK_SIMULATOR_TEST_wifi_profile.xml +0 -19,19,0
+23,HARDWARE_INTERFACE_GUIDE.md +198 -0,198,0
+24,README.md +1 -0,2,0
+25,ESP32_ECU_Interface_Wiring.svg +94 -0,94,0
+26,README.md +1 -0,2,0
+27,ESP32_ECU_Interface_Wiring.svg +3 -2,6,0
+28,Edited WebInterface.cpp +3 -1,7,0
+29,ESP32_WiFi_StandAlone_Test.ino +1 -0,3,0
+30,README.md +1 -0,3,0
+31,WebInterface.cpp +23 -4,34,0
+32,WebInterface.h +2 -0,4,0
+33,CKP_CMP_Interface_Wiring.svg +76 -0,76,0
+34,README.md +1 -0,2,0
+35,WebInterface.cpp +3 -3,8,0
+36,WebPage.h +9 -8,25,0
+37,AppConfig.h +1 -0,3,0
+38,CHANGELOG.md +10 -0,10,0
+39,README.md +2 -0,4,0
+40,SimulatorState.cpp +2 -1,5,0
+41,WebInterface.cpp +1 -0,3,0
+42,WebPage.h +3 -3,12,0

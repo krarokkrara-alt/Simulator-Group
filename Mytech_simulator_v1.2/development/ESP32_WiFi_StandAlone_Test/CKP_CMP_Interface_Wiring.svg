@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050">
+  <defs>
+    <style>
+      .bg{fill:#f6f8fb}.panel{fill:#fff;stroke:#263238;stroke-width:3}.ttl{font:700 34px Arial;fill:#102027}.h{font:700 25px Arial;fill:#0d47a1}.t{font:18px Arial;fill:#263238}.s{font:15px Arial;fill:#455a64}.tiny{font:13px Arial;fill:#455a64}.warn{font:700 17px Arial;fill:#b71c1c}.sig{fill:none;stroke:#1565c0;stroke-width:5}.gnd{fill:none;stroke:#2e7d32;stroke-width:5}.pwr{fill:none;stroke:#c62828;stroke-width:5}.wire{fill:none;stroke:#263238;stroke-width:4}.part{fill:#e3f2fd;stroke:#263238;stroke-width:3}.esp{fill:#e8f5e9;stroke:#2e7d32;stroke-width:3}.ecu{fill:#fff3e0;stroke:#e65100;stroke-width:3}.node{fill:#263238}.dash{fill:none;stroke:#78909c;stroke-width:3;stroke-dasharray:9 7}
+    </style>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3z" fill="#1565c0"/></marker>
+  </defs>
+  <rect class="bg" width="1600" height="1050"/>
+  <text class="ttl" x="800" y="50" text-anchor="middle">CKP / CMP Interface Circuits for ESP32 ECU Bench Simulator</text>
+  <text class="warn" x="800" y="80" text-anchor="middle">Choose Hall OR Magnetic VR to match the exact ECU input — never connect both circuits to the same ECU pin</text>
+
+  <!-- Hall panel -->
+  <rect class="panel" x="40" y="105" width="1520" height="420" rx="14"/>
+  <text class="h" x="70" y="145">OPTION A — HALL EFFECT / OPEN-COLLECTOR (recommended first bench interface)</text>
+  <rect class="esp" x="75" y="190" width="185" height="245" rx="10"/>
+  <text class="t" x="167" y="225" text-anchor="middle">ESP32</text>
+  <text class="s" x="167" y="275" text-anchor="middle">GPIO18 — CKP</text>
+  <text class="s" x="167" y="365" text-anchor="middle">GPIO19 — CMP</text>
+  <text class="s" x="167" y="415" text-anchor="middle">GND</text>
+
+  <!-- CKP hall -->
+  <path class="sig" d="M260 270 H350" marker-end="url(#arr)"/><text class="s" x="305" y="255" text-anchor="middle">R1 2.2k</text>
+  <circle class="node" cx="370" cy="270" r="6"/><text class="t" x="385" y="276">B</text>
+  <path class="wire" d="M370 270 L425 235 M425 235 V195 M425 235 V315"/>
+  <text class="t" x="445" y="230">Q1 MMBT3904</text><text class="s" x="445" y="253">CKP open collector</text>
+  <path class="wire" d="M370 270 V325 H330"/><rect class="part" x="250" y="305" width="80" height="40" rx="5"/><text class="s" x="290" y="330" text-anchor="middle">47k</text><path class="wire" d="M250 325 H225 V470 H425"/>
+  <path class="sig" d="M425 195 H550"/><rect class="part" x="550" y="175" width="90" height="40" rx="5"/><text class="s" x="595" y="200" text-anchor="middle">220Ω</text><path class="sig" d="M640 195 H795" marker-end="url(#arr)"/>
+  <rect class="ecu" x="795" y="160" width="180" height="70" rx="8"/><text class="t" x="885" y="190" text-anchor="middle">ECU CKP SIGNAL</text><text class="s" x="885" y="213" text-anchor="middle">Hall input</text>
+  <path class="wire" d="M720 195 V285 H680"/><rect class="part" x="590" y="265" width="90" height="40" rx="5"/><text class="s" x="635" y="290" text-anchor="middle">10k*</text><path class="pwr" d="M590 285 H535 V250"/><text class="s" x="500" y="245">ECU +5V*</text>
+
+  <!-- CMP hall -->
+  <path class="sig" d="M260 360 H350" marker-end="url(#arr)"/><text class="s" x="305" y="385" text-anchor="middle">R4 2.2k</text>
+  <circle class="node" cx="370" cy="360" r="6"/><text class="t" x="385" y="366">B</text>
+  <path class="wire" d="M370 360 L425 355 M425 355 V325 M425 355 V425"/>
+  <text class="t" x="445" y="365">Q2 MMBT3904</text><text class="s" x="445" y="388">CMP open collector</text>
+  <path class="wire" d="M370 360 V420 H330"/><rect class="part" x="250" y="400" width="80" height="40" rx="5"/><text class="s" x="290" y="425" text-anchor="middle">47k</text><path class="wire" d="M250 420 H225 V470"/>
+  <path class="sig" d="M425 325 H550"/><rect class="part" x="550" y="305" width="90" height="40" rx="5"/><text class="s" x="595" y="330" text-anchor="middle">220Ω</text><path class="sig" d="M640 325 H795" marker-end="url(#arr)"/>
+  <rect class="ecu" x="795" y="290" width="180" height="70" rx="8"/><text class="t" x="885" y="320" text-anchor="middle">ECU CMP SIGNAL</text><text class="s" x="885" y="343" text-anchor="middle">Hall input</text>
+  <path class="wire" d="M720 325 V415 H680"/><rect class="part" x="590" y="395" width="90" height="40" rx="5"/><text class="s" x="635" y="420" text-anchor="middle">10k*</text><path class="pwr" d="M590 415 H535 V380"/><text class="s" x="500" y="375">ECU +5V*</text>
+
+  <path class="gnd" d="M260 410 V470 H1125"/><path class="gnd" d="M425 315 V470 M425 425 V470"/>
+  <rect class="ecu" x="995" y="400" width="200" height="70" rx="8"/><text class="t" x="1095" y="430" text-anchor="middle">ECU SENSOR GND</text><text class="s" x="1095" y="453" text-anchor="middle">common star ground</text>
+  <text class="s" x="1020" y="190">Hall wiring:</text><text class="s" x="1020" y="220">• Signal → CKP/CMP input</text><text class="s" x="1020" y="247">• Ground → ECU sensor ground</text><text class="s" x="1020" y="274">• ECU sensor supply is not fed into ESP32</text>
+  <text class="warn" x="1020" y="325">*Fit the 10k pull-up only if the ECU has no internal pull-up.</text>
+  <text class="warn" x="1020" y="355">Hardware output is inverted; compensate polarity in firmware.</text>
+  <text class="s" x="1020" y="385">Q1/Q2 must be rated above the measured ECU pull-up voltage.</text>
+
+  <!-- VR panel -->
+  <rect class="panel" x="40" y="550" width="1520" height="450" rx="14"/>
+  <text class="h" x="70" y="590">OPTION B — MAGNETIC VR / BIPOLAR DIFFERENTIAL (requires new DAC firmware)</text>
+  <rect class="esp" x="75" y="665" width="185" height="220" rx="10"/>
+  <text class="t" x="167" y="700" text-anchor="middle">ESP32 HSPI</text>
+  <text class="s" x="167" y="745" text-anchor="middle">GPIO14 — SCK</text>
+  <text class="s" x="167" y="775" text-anchor="middle">GPIO13 — MOSI</text>
+  <text class="s" x="167" y="805" text-anchor="middle">GPIO16 — CS</text>
+  <text class="s" x="167" y="835" text-anchor="middle">GPIO17 — LDAC</text>
+  <path class="sig" d="M260 775 H315" marker-end="url(#arr)"/>
+  <rect class="part" x="315" y="700" width="175" height="150" rx="9"/><text class="t" x="402" y="740" text-anchor="middle">74AHCT125</text><text class="s" x="402" y="770" text-anchor="middle">3.3 → 5 V logic</text><text class="s" x="402" y="800" text-anchor="middle">SCK/MOSI/CS/LDAC</text><text class="s" x="402" y="830" text-anchor="middle">VCC = 5 V</text>
+  <path class="sig" d="M490 775 H545" marker-end="url(#arr)"/>
+  <rect class="part" x="545" y="685" width="180" height="180" rx="9"/><text class="t" x="635" y="725" text-anchor="middle">MCP4922</text><text class="s" x="635" y="755" text-anchor="middle">Dual 12-bit SPI DAC</text><text class="s" x="635" y="785" text-anchor="middle">VDD/VREF = 5.000 V</text><text class="s" x="635" y="820" text-anchor="middle">DAC A = CKP</text><text class="s" x="635" y="845" text-anchor="middle">DAC B = CMP</text>
+
+  <path class="sig" d="M725 735 H790"/><text class="s" x="755" y="720">0–5V</text>
+  <rect class="part" x="790" y="650" width="230" height="165" rx="9"/><text class="t" x="905" y="690" text-anchor="middle">U1 OPA2197 — CKP</text><text class="s" x="905" y="720" text-anchor="middle">isolated ±12 V supply</text><text class="s" x="905" y="750" text-anchor="middle">CKP+ = 2 × (DAC A − 2.5 V)</text><text class="s" x="905" y="780" text-anchor="middle">CKP− = −CKP+</text>
+  <path class="sig" d="M1020 685 H1110"/><rect class="part" x="1110" y="665" width="80" height="40" rx="5"/><text class="s" x="1150" y="690" text-anchor="middle">100Ω</text><path class="sig" d="M1190 685 H1270"/>
+  <path class="sig" d="M1020 780 H1110"/><rect class="part" x="1110" y="760" width="80" height="40" rx="5"/><text class="s" x="1150" y="785" text-anchor="middle">100Ω</text><path class="sig" d="M1190 780 H1270"/>
+  <rect class="ecu" x="1270" y="650" width="220" height="165" rx="9"/><text class="t" x="1380" y="695" text-anchor="middle">ECU CKP VR INPUT</text><text class="s" x="1380" y="735" text-anchor="middle">CKP+ ← upper output</text><text class="s" x="1380" y="770" text-anchor="middle">CKP− ← lower output</text>
+
+  <path class="sig" d="M725 840 H790"/><text class="s" x="755" y="865">0–5V</text>
+  <rect class="part" x="790" y="835" width="230" height="135" rx="9"/><text class="t" x="905" y="875" text-anchor="middle">U2 OPA2197 — CMP</text><text class="s" x="905" y="905" text-anchor="middle">CMP+ = 2 × (DAC B − 2.5 V)</text><text class="s" x="905" y="935" text-anchor="middle">CMP− = −CMP+</text>
+  <path class="sig" d="M1020 865 H1110"/><rect class="part" x="1110" y="845" width="80" height="40" rx="5"/><text class="s" x="1150" y="870" text-anchor="middle">100Ω</text><path class="sig" d="M1190 865 H1270"/>
+  <path class="sig" d="M1020 940 H1110"/><rect class="part" x="1110" y="920" width="80" height="40" rx="5"/><text class="s" x="1150" y="945" text-anchor="middle">100Ω</text><path class="sig" d="M1190 940 H1270"/>
+  <rect class="ecu" x="1270" y="835" width="220" height="135" rx="9"/><text class="t" x="1380" y="875" text-anchor="middle">ECU CMP VR INPUT</text><text class="s" x="1380" y="910" text-anchor="middle">CMP+ / CMP−</text><text class="s" x="1380" y="940" text-anchor="middle">no external sensor supply</text>
+  <path class="pwr" d="M905 650 V620"/><text class="s" x="920" y="625">isolated ±12 V</text>
+  <text class="warn" x="75" y="975">VR outputs cross 0 V. Start at 0.5–1.0 V peak differential and verify with an oscilloscope before connecting an ECU.</text>
+  <text class="tiny" x="800" y="1025" text-anchor="middle">Bench prototype only. Exact amplitude, polarity, tooth pattern and input impedance must come from the ECU service information.</text>
+</svg>

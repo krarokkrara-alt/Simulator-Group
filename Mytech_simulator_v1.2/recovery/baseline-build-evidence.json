@@ -1,0 +1,116 @@
+{
+  "recordedUtc": "2026-10-03T20:00:32.961910+00:00",
+  "observedCompileExitCode": 0,
+  "arduinoCli": "1.5.1",
+  "arduinoCore": "3.3.11",
+  "fqbn": "esp32:esp32:esp32",
+  "sourceIdentity": "recovered visible text snapshot; original byte identity unverified",
+  "hardwareTested": false,
+  "releaseApproved": false,
+  "sources": [
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/AppConfig.h",
+      "bytes": 636,
+      "sha256": "b6787b5606951e4a4f689c1f8e8b4f9fd30fad7c458f3a3307a0e6d0b5c917f0"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/ESP32_WiFi_StandAlone_Test.ino",
+      "bytes": 523,
+      "sha256": "12a90a6650b357177cc35672133e1dc293638c7f9e54400d35aa960bd1c2d37a"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/SignalGenerator.cpp",
+      "bytes": 1305,
+      "sha256": "478559940dbee4d58311cd4515c8d9fd8378ea5d2013812b1561f36c944511af"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/SignalGenerator.h",
+      "bytes": 343,
+      "sha256": "cb582e83cc5544ae0c7d31e12d23a93ca07cd4ebff5b3c9af1ea00c418c1d071"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/SimulatorState.cpp",
+      "bytes": 2289,
+      "sha256": "8bb7e41be958304afb56f2269fccc14934a8bab262103be035040c3086a38cd3"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/SimulatorState.h",
+      "bytes": 567,
+      "sha256": "68094e914abb07a9461da803c06422f56d691f12a4250590f6cb06b11dde7bae"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/VehicleProfiles.cpp",
+      "bytes": 2566,
+      "sha256": "cdf95e876e99349f2d9312fcea87a18ab4b7cad570853c92ac89067149ab6ac5"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/VehicleProfiles.h",
+      "bytes": 452,
+      "sha256": "c697be73263b947ac1a37e38067618d435d63b4651eb6d60fbea68489d0228f3"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/WebInterface.cpp",
+      "bytes": 3164,
+      "sha256": "25dcd270a7d9ff8551a0de5eb3105fb6ad135e8c1740b19e8a444bb1686e08b1"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/WebInterface.h",
+      "bytes": 440,
+      "sha256": "d6bd2e24ef4872b2d631b3319cfe48528ad2a782937369ea403a8fe1c7880432"
+    },
+    {
+      "path": "recovery/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test/WebPage.h",
+      "bytes": 4570,
+      "sha256": "232f2c140d85a64111f3691380c46c32118c8b546ab65723e751f7924b01a840"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "build/recovered-v0.3.0/boot_app0.bin",
+      "bytes": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    },
+    {
+      "path": "build/recovered-v0.3.0/build_opt.h",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.bin",
+      "bytes": 947392,
+      "sha256": "c34038d1faaf5a09eb0fb72db95f12ba912a1e2c1d70898392004a8338821f58"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.bootloader.bin",
+      "bytes": 24992,
+      "sha256": "427f96e10c620c4f062dab15da54fc45494d897e8397ae6f3aecc98c42d7e379"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.elf",
+      "bytes": 12945504,
+      "sha256": "bc4dbea4a33cb672e320ac73b9f4fa3abc6ca746e8aa58f49f2c479694bf03e2"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.map",
+      "bytes": 17301096,
+      "sha256": "c20a6c0adade3c233fe11e70340148f39b97b6e7cb5fbfcb85c30533e3b6bcb3"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.merged.bin",
+      "bytes": 4194304,
+      "sha256": "88491c8741ffd45b6653ef033b771947a588ade19c41b60eb186f5aa91f45341"
+    },
+    {
+      "path": "build/recovered-v0.3.0/ESP32_WiFi_StandAlone_Test.ino.partitions.bin",
+      "bytes": 3072,
+      "sha256": "148b959cbff1c38aa8e1d5c0ba9d612c54997b945e56a63f41223eef650653a1"
+    }
+  ],
+  "log": [
+    {
+      "path": "recovery/compile-recovered-v0.3.0.log",
+      "bytes": 210,
+      "sha256": "3b15b7b65d87671dfa9a921ec1e4701d81f0331c7abd1213b2d10d37a83b42af"
+    }
+  ]
+}

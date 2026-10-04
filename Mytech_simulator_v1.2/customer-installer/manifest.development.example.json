@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "releaseApproved": false,
+  "firmwareVersion": "NOT_BUILT",
+  "chip": "esp32",
+  "image": {
+    "kind": "merged",
+    "file": "firmware/merged.bin",
+    "offset": null,
+    "sha256": null
+  },
+  "tool": {
+    "file": "tools/esptool.exe",
+    "version": null,
+    "sha256": null
+  },
+  "wifi": {
+    "ssid": "PUK_SIMULATOR_TEST",
+    "password": "12345678",
+    "url": "http://192.168.4.1"
+  }
+}
