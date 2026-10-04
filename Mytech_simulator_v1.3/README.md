@@ -2,7 +2,7 @@
 
 R and d for esp 32 wifi by Mytech Product
 
-Wi-Fi: **Mytech_simulator_v1.3**, password **12345678**, URL **http://192.168.4.1**. Firmware development version **0.4.0-dev** (replaces v1.2 / 0.3.1-dev).
+Wi-Fi: **Mytech_v1.3**, password **12345678**, URL **http://192.168.4.1**. Firmware development version **0.4.0-dev** (replaces v1.2 / 0.3.1-dev).
 
 ## ใหม่ใน v1.3: เลือกยี่ห้อ → รุ่น ผ่าน Wi-Fi แล้ว CKP/CMP เปลี่ยนตามรุ่นจริง
 

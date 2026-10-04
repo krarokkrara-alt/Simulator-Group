@@ -3,7 +3,7 @@
 
 namespace Config {
 constexpr char FW_VERSION[] = "0.4.0-dev";
-constexpr char AP_SSID[] = "Mytech_simulator_v1.3";
+constexpr char AP_SSID[] = "Mytech_v1.3";
 constexpr char AP_PASSWORD[] = "12345678";
 const IPAddress AP_IP(192, 168, 4, 1);
 const IPAddress AP_GATEWAY(192, 168, 4, 1);
