@@ -1,0 +1,135 @@
+{
+  "checkedAt": "2026-10-03T19:45:50.853Z",
+  "files": [
+    {
+      "name": "AppConfig.h",
+      "pass": true,
+      "lines": 22,
+      "utf16Length": 636,
+      "fnv1aUtf16": "27d0bc7b",
+      "sha256": "b6787b5606951e4a4f689c1f8e8b4f9fd30fad7c458f3a3307a0e6d0b5c917f0"
+    },
+    {
+      "name": "ESP32_WiFi_StandAlone_Test.ino",
+      "pass": true,
+      "lines": 23,
+      "utf16Length": 523,
+      "fnv1aUtf16": "dde3c53d",
+      "sha256": "12a90a6650b357177cc35672133e1dc293638c7f9e54400d35aa960bd1c2d37a"
+    },
+    {
+      "name": "README.md",
+      "pass": true,
+      "lines": 72,
+      "utf16Length": 3202,
+      "fnv1aUtf16": "6964f1f2",
+      "sha256": "3d58d91df9c620e463c77d19441f51ea88470851d074d24a29553b800ee32716"
+    },
+    {
+      "name": "SignalGenerator.cpp",
+      "pass": true,
+      "lines": 38,
+      "utf16Length": 1305,
+      "fnv1aUtf16": "9cbf566a",
+      "sha256": "478559940dbee4d58311cd4515c8d9fd8378ea5d2013812b1561f36c944511af"
+    },
+    {
+      "name": "SignalGenerator.h",
+      "pass": true,
+      "lines": 15,
+      "utf16Length": 343,
+      "fnv1aUtf16": "819dcc66",
+      "sha256": "cb582e83cc5544ae0c7d31e12d23a93ca07cd4ebff5b3c9af1ea00c418c1d071"
+    },
+    {
+      "name": "SimulatorState.cpp",
+      "pass": true,
+      "lines": 60,
+      "utf16Length": 2289,
+      "fnv1aUtf16": "21bab9e2",
+      "sha256": "8bb7e41be958304afb56f2269fccc14934a8bab262103be035040c3086a38cd3"
+    },
+    {
+      "name": "SimulatorState.h",
+      "pass": true,
+      "lines": 25,
+      "utf16Length": 567,
+      "fnv1aUtf16": "c29d9ee8",
+      "sha256": "68094e914abb07a9461da803c06422f56d691f12a4250590f6cb06b11dde7bae"
+    },
+    {
+      "name": "WebInterface.cpp",
+      "pass": true,
+      "lines": 65,
+      "utf16Length": 3164,
+      "fnv1aUtf16": "33324901",
+      "sha256": "25dcd270a7d9ff8551a0de5eb3105fb6ad135e8c1740b19e8a444bb1686e08b1"
+    },
+    {
+      "name": "WebInterface.h",
+      "pass": true,
+      "lines": 18,
+      "utf16Length": 440,
+      "fnv1aUtf16": "21ad9546",
+      "sha256": "d6bd2e24ef4872b2d631b3319cfe48528ad2a782937369ea403a8fe1c7880432"
+    },
+    {
+      "name": "WebPage.h",
+      "pass": true,
+      "lines": 33,
+      "utf16Length": 4566,
+      "fnv1aUtf16": "76ad0420",
+      "sha256": "232f2c140d85a64111f3691380c46c32118c8b546ab65723e751f7924b01a840"
+    },
+    {
+      "name": "VehicleProfiles.cpp",
+      "pass": true,
+      "lines": 59,
+      "utf16Length": 2566,
+      "fnv1aUtf16": "3ca48f49",
+      "sha256": "cdf95e876e99349f2d9312fcea87a18ab4b7cad570853c92ac89067149ab6ac5"
+    },
+    {
+      "name": "VehicleProfiles.h",
+      "pass": true,
+      "lines": 21,
+      "utf16Length": 452,
+      "fnv1aUtf16": "e5c1e662",
+      "sha256": "c697be73263b947ac1a37e38067618d435d63b4651eb6d60fbea68489d0228f3"
+    },
+    {
+      "name": "HARDWARE_INTERFACE_GUIDE.md",
+      "pass": true,
+      "lines": 198,
+      "utf16Length": 9549,
+      "fnv1aUtf16": "4ce09f19",
+      "sha256": "ec36c455c09b3c555918b665a9c7a672f273e273201a1f22bf717b0fcf3de2d6"
+    },
+    {
+      "name": "ESP32_ECU_Interface_Wiring.svg",
+      "pass": true,
+      "lines": 95,
+      "utf16Length": 11647,
+      "fnv1aUtf16": "12219369",
+      "sha256": "8d404cff8cfe55e499d50bd6296ef680a2bec681ff29523d5606d21683775ae9"
+    },
+    {
+      "name": "CKP_CMP_Interface_Wiring.svg",
+      "pass": true,
+      "lines": 76,
+      "utf16Length": 9838,
+      "fnv1aUtf16": "986aa738",
+      "sha256": "086352594e14d00c9b35680958ad0913705729d19e5146bd813e9c7935045a83"
+    },
+    {
+      "name": "CHANGELOG.md",
+      "pass": true,
+      "lines": 10,
+      "utf16Length": 469,
+      "fnv1aUtf16": "21971fef",
+      "sha256": "2d3528fb083e0a20ee8babd2f222272a600cf95213755e17c59f796eaf8ab306"
+    }
+  ],
+  "passed": 16,
+  "total": 16
+}

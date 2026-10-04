@@ -1,0 +1,180 @@
+{
+  "mode": "localhost-mock",
+  "target": "http://127.0.0.1:64926",
+  "passed": true,
+  "core_transport_verified": false,
+  "hardware_verified": false,
+  "cases": [
+    {
+      "name": "initial STOP/RPM0",
+      "status": 200,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [
+        "running",
+        "rpm"
+      ],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "GET cannot mutate",
+      "status": 405,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "valid POST",
+      "status": 200,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "query ignored including plain collision",
+      "status": 200,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "bare body segment",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "mixed malformed value",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "duplicate body field",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "trailing delimiter",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "raw NUL",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "whitespace",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "extra equals",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "percent encoding",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "oversized zero-valued body",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "wrong content type",
+      "status": 415,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "missing content type",
+      "status": 415,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "missing content length",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "zero content length",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    },
+    {
+      "name": "invalid content length",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": true
+    },
+    {
+      "name": "negative content length",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": true
+    },
+    {
+      "name": "truncated body",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": true
+    },
+    {
+      "name": "nonempty transfer encoding",
+      "status": 400,
+      "snapshot_unchanged": true,
+      "expected_fields_unchanged": true,
+      "allowed_state_changes": [],
+      "disconnect_allowed": false
+    }
+  ]
+}

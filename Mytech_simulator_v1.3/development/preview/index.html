@@ -1,0 +1,138 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"><meta http-equiv="Pragma" content="no-cache">
+<title>ESP32 ECU Simulator</title><style>
+:root{color-scheme:dark;font-family:system-ui}body{margin:auto;max-width:820px;padding:18px;background:#0b1220;color:#e5e7eb}
+h1{font-size:1.5rem}.card{background:#172033;border:1px solid #334155;border-radius:14px;padding:16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}button{padding:12px 18px;border:0;border-radius:9px;font-weight:700;margin:4px;background:#334155;color:white}.start{background:#16a34a}.stop{background:#dc2626}.active{outline:3px solid #38bdf8}input{width:100%}.value{float:right;color:#38bdf8}#status{font-weight:700;color:#fbbf24}
+select{width:100%;padding:11px;border-radius:8px;background:#0f172a;color:#e5e7eb;border:1px solid #475569}.info{line-height:1.55}.warning{color:#fbbf24;font-size:.9rem}.unverified{color:#f87171;font-weight:700}
+</style></head><body><aside id="offlinePreviewBanner" style="position:sticky;top:0;z-index:1000;padding:18px;margin-bottom:18px;border:3px solid #fbbf24;border-radius:12px;background:#422006;color:#fef3c7;line-height:1.6"><strong style="font-size:1.2rem">ตัวอย่างจำลอง — ไม่เชื่อมต่อบอร์ด/ไม่ใช่ผลทดสอบฮาร์ดแวร์</strong><br>ตรวจหน้าจอและลองปุ่มได้ออฟไลน์ ค่าและสถานะทั้งหมดจำลองในเบราว์เซอร์ ไม่สร้างสัญญาณ GPIO ไม่เชื่อมต่อ Wi-Fi และไม่แฟลชบอร์ด</aside><h1>ESP32 Wi-Fi Stand Alone Test <small id="version" style="font-size:.55em;color:#94a3b8"></small></h1><div class="card"><span id="status">Connecting...</span><br>
+<button class="start" onclick="cmd('run',1)">START</button><button class="stop" onclick="cmd('run',0)">STOP</button><button onclick="cmd('selftest',1)">SELF TEST</button><p id="commandError" class="warning" role="alert"></p></div>
+<div class="card"><h3>Vehicle / Trigger profile (CKP / CMP)</h3><div class="grid"><label>Brand<select id="brand" onchange="selectBrand(this.value)"></select></label><label>Model / Engine<select id="profile" onchange="selectProfile(this.value)"></select></label></div>
+<div id="profileInfo" class="info"></div><svg id="wave" viewBox="0 0 740 90" style="width:100%;margin-top:8px" role="img" aria-label="CKP and CMP pattern over 720 degrees"></svg><p class="warning">Important: verify the exact model year, engine code and wiring diagram. ESP32 outputs are 3.3 V digital; Magnetic VR simulation requires an external bipolar VR driver/conditioner.</p></div>
+<div class="card"><label>RPM <span class="value" id="rpmV"></span></label><input id="rpm" type="range" min="0" max="8000" step="50" oninput="show(this)" onchange="cmd('rpm',this.value)"></div>
+<div class="grid"><div class="card"><h3>Engine signals</h3><button id="ckp" onclick="toggle('ckp')">CKP</button><button id="cmp" onclick="toggle('cmp')">CMP</button></div>
+<div class="card"><h3>GPIO test</h3><button id="led" onclick="toggle('led')">LED GPIO 2</button><button id="scope" onclick="toggle('scope')">SCOPE GPIO 4</button></div></div>
+<div class="card"><h3>Sensor outputs (PWM 0-100%)</h3><div id="sensors"></div></div>
+<script>window.__offlinePreviewConfig={"version":"0.4.0-dev","maxRpm":8000,"profiles":[{"id":0,"brand":"Generic","model":"Hall / Hall (60-2)","engine":"Template","ckpType":"Hall effect","cmpType":"Hall effect","ckpPattern":"60-2","teeth":60,"missing":2,"cams":[[0,90]],"verified":true,"source":"Generic template","notes":"Digital 3-wire sensor template."},{"id":1,"brand":"Generic","model":"VR / Hall (60-2)","engine":"Template","ckpType":"Magnetic VR","cmpType":"Hall effect","ckpPattern":"60-2","teeth":60,"missing":2,"cams":[[0,90]],"verified":true,"source":"Generic template","notes":"Common mixed sensor template."},{"id":2,"brand":"Generic","model":"VR / VR (60-2)","engine":"Template","ckpType":"Magnetic VR","cmpType":"Magnetic VR","ckpPattern":"60-2","teeth":60,"missing":2,"cams":[[0,90]],"verified":true,"source":"Generic template","notes":"Two-wire magnetic sensor template."},{"id":3,"brand":"Toyota","model":"Hilux Vigo / Fortuner / Innova","engine":"1KD-FTV / 2KD-FTV","ckpType":"Magnetic VR","cmpType":"Magnetic VR","ckpPattern":"36-2","teeth":36,"missing":2,"cams":[[335,20]],"verified":true,"source":"DENSO CRS service manual Hilux/Innova 1KD/2KD (2004): NE 34 pulses/360CA (36-2), G 1 pulse/720CA","notes":"ECU detects cylinder 1 when the G pulse and the NE missing-tooth gap occur together; G pulse is placed across the revolution-1 gap."},{"id":4,"brand":"Isuzu","model":"D-Max / MU-7 (common rail)","engine":"4JJ1-TC","ckpType":"Hall effect","cmpType":"Hall effect","ckpPattern":"60-4","teeth":60,"missing":4,"cams":[[0,12],[30,12],[180,12],[360,12],[540,12]],"verified":true,"source":"Isuzu 4JJ1-TC service manual: CKP 56 notches every 6 deg + 24 deg uncut (60-4); CMP 4 projections every 90 cam deg + 1 reference","notes":"CKP/CMP are MRE square-wave sensors. Reference-projection phase is approximate; verify with a scope."},{"id":5,"brand":"Mitsubishi","model":"Triton / Pajero Sport (CRDi)","engine":"4D56 16V Di-D","ckpType":"Magnetic VR","cmpType":"Hall effect","ckpPattern":"36-2","teeth":36,"missing":2,"cams":[[0,10],[30,10],[210,10],[390,10],[570,10]],"verified":false,"source":"DENSO HP3 manual L200/Triton 4D56/4M41: TDC sensor 5 pulses/720CA (30, 180, 180, 180 CA spacing). CKP tooth count NOT confirmed","notes":"UNVERIFIED CKP: 36-2 is assumed. CMP pulse spacing is from the DENSO manual."},{"id":6,"brand":"Honda","model":"Civic FD","engine":"R18A","ckpType":"Hall effect","cmpType":"Hall effect","ckpPattern":"60-2","teeth":60,"missing":2,"cams":[[0,90]],"verified":false,"source":"No service source yet","notes":"UNVERIFIED placeholder (generic 60-2). Fill in the real R18A tooth counts before use."},{"id":7,"brand":"Nissan","model":"Navara D40","engine":"YD25DDTi","ckpType":"Hall effect","cmpType":"Hall effect","ckpPattern":"60-2","teeth":60,"missing":2,"cams":[[0,90]],"verified":false,"source":"No service source yet","notes":"UNVERIFIED placeholder (generic 60-2). Fill in the real YD25 tooth counts before use."},{"id":8,"brand":"Generic","model":"VR / Hall (36-1)","engine":"Template","ckpType":"Magnetic VR","cmpType":"Hall effect","ckpPattern":"36-1","teeth":36,"missing":1,"cams":[[0,90]],"verified":true,"source":"Generic template","notes":"Common 36-1 wheel."},{"id":9,"brand":"Generic","model":"VR / Hall (36-2)","engine":"Template","ckpType":"Magnetic VR","cmpType":"Hall effect","ckpPattern":"36-2","teeth":36,"missing":2,"cams":[[0,90]],"verified":true,"source":"Generic template","notes":"Common 36-2 wheel."}],"sourceSha256":"452e1b2c1dd080d2ed0e0db80f49445464005af57c37572ad6ef80df176a5422"};
+/* Offline demonstration only. This is not the firmware parser or an HTTP test. */
+(() => {
+  const config = window.__offlinePreviewConfig;
+  let selfTestTimer;
+  const state = {version:config.version+' / OFFLINE MOCK', running:false, rpm:1000, ckp:true, cmp:true, led:false, scope:false, selfTest:false, profile:0, tps:10, map:40, ect:50, iat:40, o2:50};
+  const booleans = new Set(['run','ckp','cmp','led','scope','selftest']);
+  const allowed = new Set(['run','rpm','ckp','cmp','led','scope','profile','selftest','tps','map','ect','iat','o2']);
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const reply = (status,data) => Promise.resolve({ok:status>=200&&status<300,status,json:async()=>clone(data),text:async()=>JSON.stringify(data)});
+  // Every fetch stays in this mock; there is deliberately no native-fetch fallback.
+  window.fetch = (input,options={}) => {
+    const path = String(input).split('?')[0];
+    const method = (options.method||'GET').toUpperCase();
+    if (path==='/api/state' && method==='GET') return reply(200,state);
+    if (path==='/api/profiles' && method==='GET') return reply(200,config.profiles);
+    if (path!=='/api/set') return reply(404,{error:'Offline preview endpoint only'});
+    if (method!=='POST') return reply(405,{error:'Use POST with text/plain command body (offline mock)'});
+    const headers = new Headers(options.headers||{});
+    if ((headers.get('Content-Type')||'').split(';')[0].trim()!=='text/plain') return reply(415,{error:'Content-Type must be text/plain (offline mock)'});
+    const body = options.body;
+    if (typeof body!=='string' || body.length===0 || new TextEncoder().encode(body).length>256 || /[^\x21-\x7e]/.test(body)) return reply(400,{error:'Invalid ASCII command body (offline mock)'});
+    const staged = new Map();
+    for (const segment of body.split('&')) {
+      const pair = segment.match(/^([a-z]+)=([0-9]+)$/);
+      if (!pair || !allowed.has(pair[1]) || staged.has(pair[1])) return reply(400,{error:'Malformed, unknown or duplicate command (offline mock)'});
+      const [,key,text] = pair;
+      if (booleans.has(key) && text!=='0' && text!=='1') return reply(400,{error:'Boolean must be 0 or 1 (offline mock)'});
+      const value = Number(text);
+      const maximum = key==='rpm'?config.maxRpm:key==='profile'?config.profiles.length-1:booleans.has(key)?1:100;
+      if (!Number.isSafeInteger(value) || value>maximum) return reply(400,{error:'Command value out of range (offline mock)'});
+      staged.set(key,value);
+    }
+    for (const [key,value] of staged) {
+      if (key==='selftest') continue;
+      state[key==='run'?'running':key] = booleans.has(key)?value===1:value;
+    }
+    if (staged.get('selftest')===1) {
+      clearTimeout(selfTestTimer);
+      state.selfTest=state.led=state.scope=true;
+      selfTestTimer=setTimeout(()=>{state.selfTest=state.led=state.scope=false;},3000);
+    }
+    return reply(200,state);
+  };
+})();
+
+</script>
+<script>
+let state={},profiles=[];const names=['tps','map','ect','iat','o2'];
+const statusEl=document.getElementById('status'),versionEl=document.getElementById('version'),rpmEl=document.getElementById('rpm'),profileEl=document.getElementById('profile'),profileInfoEl=document.getElementById('profileInfo'),sensorsEl=document.getElementById('sensors');
+const commandErrorEl=document.getElementById('commandError');
+const activePointers=new Map(),keyboardRanges=new Set(),dirtyRanges=new Set(),rangeRevisions=new Map(),pendingCommands=new Map();
+const pendingValues=new Map(),commandQueue=[],commandKeys=new Set(['run','rpm','ckp','cmp','led','scope','profile','selftest',...names]);
+const maxQueuedCommands=commandKeys.size+1;
+let inFlightCommand=null;
+let commandSequence=0,refreshSequence=0;
+function isRange(e){return e&&e.type==='range'&&(e.id==='rpm'||names.includes(e.id))}
+function rangeBusy(e){return pendingCommands.has(e.id)||keyboardRanges.has(e.id)||[...activePointers.values()].includes(e.id)||dirtyRanges.has(e.id)}
+document.addEventListener('pointerdown',e=>{if(isRange(e.target))activePointers.set(e.pointerId,e.target.id)},true);
+['pointerup','pointercancel'].forEach(type=>document.addEventListener(type,e=>{const id=activePointers.get(e.pointerId);if(activePointers.delete(e.pointerId)){if(type==='pointercancel')dirtyRanges.delete(id);refresh()}},true));
+document.addEventListener('input',e=>{if(isRange(e.target)){dirtyRanges.add(e.target.id);rangeRevisions.set(e.target.id,(rangeRevisions.get(e.target.id)||0)+1)}},true);
+document.addEventListener('keydown',e=>{if(isRange(e.target)&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(e.key))keyboardRanges.add(e.target.id)},true);
+document.addEventListener('keyup',e=>{if(isRange(e.target)&&keyboardRanges.delete(e.target.id))refresh()},true);
+document.addEventListener('focusout',e=>{if(isRange(e.target)){dirtyRanges.delete(e.target.id);keyboardRanges.delete(e.target.id);for(const [pointer,id]of activePointers)if(id===e.target.id)activePointers.delete(pointer);refresh()}},true);
+function finishCommand(k,sequence,editRevision){if(pendingCommands.get(k)===sequence){pendingCommands.delete(k);pendingValues.delete(k);if((rangeRevisions.get(k)||0)===editRevision)dirtyRanges.delete(k)}}
+async function drainCommands(){
+ if(inFlightCommand||commandQueue.length===0)return;
+ const item=commandQueue.shift();inFlightCommand=item;let accepted=false;
+ try{
+  const r=await fetch('/api/set',{method:'POST',headers:{'Content-Type':'text/plain'},body:item.k+'='+item.v,cache:'no-store'});
+  const data=await r.json();if(!r.ok)throw Error(data.error||('HTTP '+r.status));
+  finishCommand(item.k,item.sequence,item.editRevision);commandErrorEl.textContent='';render(data);accepted=true;
+ }catch(e){finishCommand(item.k,item.sequence,item.editRevision);commandErrorEl.textContent='Command failed ('+item.k+'): '+e.message;
+ }finally{
+  inFlightCommand=null;item.resolve(accepted);
+  if(commandQueue.length)drainCommands();else refresh();
+ }
+}
+function cmd(k,v){
+ if(!commandKeys.has(k)){commandErrorEl.textContent='Unsupported UI command';return Promise.resolve(false)}
+ const sequence=++commandSequence,editRevision=rangeRevisions.get(k)||0;pendingCommands.set(k,sequence);
+ pendingValues.set(k,v);
+ return new Promise(resolve=>{
+  const item={k,v,sequence,editRevision,resolve},stop=k==='run'&&String(v)==='0';
+  let replacementIndex=-1;
+  for(let i=commandQueue.length-1;i>=0;--i){
+   const queued=commandQueue[i];
+   // A new START may replace queued START, but never remove a queued STOP.
+   if(queued.k===k&&(k!=='run'||stop||String(queued.v)!=='0')){replacementIndex=i;commandQueue.splice(i,1);queued.resolve(false)}
+  }
+  if(commandQueue.length>=maxQueuedCommands){finishCommand(k,sequence,editRevision);commandErrorEl.textContent='Command queue is full';resolve(false);return}
+  if(stop)commandQueue.unshift(item);else if(replacementIndex>=0)commandQueue.splice(replacementIndex,0,item);else commandQueue.push(item);
+  drainCommands();
+ });
+}
+const brandEl=document.getElementById('brand'),waveEl=document.getElementById('wave');
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function brands(){return [...new Set(profiles.map(p=>p.brand))]}
+function fillModels(brand){profileEl.innerHTML=profiles.filter(p=>p.brand===brand).map(x=>`<option value="${x.id}">${esc(x.model)} / ${esc(x.engine)}</option>`).join('')}
+let shownProfile=null;
+// Switching while RUNNING restarts the CKP/CMP cycle at slot 0, so the ECU loses sync briefly.
+function confirmSwitch(){return !state.running||typeof confirm!=='function'||confirm('Engine is RUNNING. Changing the vehicle restarts the CKP/CMP cycle. Continue?')}
+function selectBrand(b){const first=profiles.find(p=>p.brand===b);if(!first)return;if(!confirmSwitch()){shownProfile=null;showProfile(state.profile);return}fillModels(b);profileEl.value=first.id;showProfile(first.id);cmd('profile',first.id)}
+function selectProfile(v){if(!confirmSwitch()){shownProfile=null;showProfile(state.profile);return}showProfile(v);cmd('profile',v)}
+function wavePath(levels,y0){const w=720/levels.length;let d=`M10 ${levels[0]?y0-22:y0}`;levels.forEach((h,i)=>{const y=h?y0-22:y0;d+=` V${y} H${10+(i+1)*w}`});return d}
+function drawWave(p){if(!waveEl||!p.teeth){if(waveEl)waveEl.innerHTML='';return}
+ const slots=4*p.teeth,ckp=[],cmp=new Array(slots).fill(0);
+ for(let s=0;s<slots;++s)ckp.push(s%2===0&&Math.floor(s/2)%p.teeth<p.teeth-p.missing);
+ (p.cams||[]).forEach(([a,w])=>{const st=Math.floor(a*p.teeth/180),n=Math.floor(w*p.teeth/180);for(let k=0;k<n;++k)cmp[(st+k)%slots]=1});
+ waveEl.innerHTML=`<text x="10" y="10" fill="#94a3b8" font-size="10">CKP ${esc(p.ckpPattern)}</text><path d="${wavePath(ckp,38)}" fill="none" stroke="#38bdf8" stroke-width="1"/><text x="10" y="52" fill="#94a3b8" font-size="10">CMP ${(p.cams||[]).length} pulse/720°</text><path d="${wavePath(cmp,82)}" fill="none" stroke="#4ade80" stroke-width="1.5"/><text x="370" y="10" fill="#64748b" font-size="10">360°</text><line x1="370" y1="12" x2="370" y2="86" stroke="#334155" stroke-dasharray="3 3"/>`}
+function showProfile(id){const p=profiles.find(x=>x.id==id);if(!p)return;if(brandEl.value!==p.brand){brandEl.value=p.brand;fillModels(p.brand)}profileEl.value=p.id;
+ if(shownProfile===p.id)return;shownProfile=p.id;
+ profileInfoEl.innerHTML=`<p><b>${esc(p.brand)} ${esc(p.model)}</b> — ${esc(p.engine)}</p><b>CKP:</b> ${esc(p.ckpType)} — ${esc(p.ckpPattern)}<br><b>CMP:</b> ${esc(p.cmpType)} — ${(p.cams||[]).length} pulse/720°`+
+ (p.verified===false?`<br><span class="unverified">UNVERIFIED tooth data — check the service manual before connecting to an ECU</span>`:'')+`<br><small>${esc(p.notes)}</small>`+(p.source?`<br><small>Source: ${esc(p.source)}</small>`:'');drawWave(p)}
+function toggle(k){cmd(k,pendingValues.has(k)?Number(pendingValues.get(k))===1?0:1:state[k]?0:1)}
+function show(e){document.getElementById(e.id+'V').textContent=e.value+(e.id==='rpm'?' rpm':'%')}
+function render(s){state=s;versionEl.textContent='v'+s.version;statusEl.textContent=s.running?'RUNNING':'STOPPED';statusEl.style.color=s.running?'#4ade80':'#f87171';
+ ['ckp','cmp','led','scope'].forEach(k=>document.getElementById(k).classList.toggle('active',s[k]));
+ if(!rangeBusy(rpmEl))rpmEl.value=s.rpm;show(rpmEl);if(!pendingCommands.has('profile'))showProfile(s.profile);names.forEach(k=>{let e=document.getElementById(k);if(!rangeBusy(e))e.value=s[k];show(e)});}
+function refresh(){const poll=++refreshSequence,revision=commandSequence,startedPending=pendingCommands.size>0||inFlightCommand!==null||commandQueue.length>0;return fetch('/api/state',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}).then(s=>{if(!startedPending&&poll===refreshSequence&&revision===commandSequence&&pendingCommands.size===0)render(s)}).catch(()=>{if(!startedPending&&poll===refreshSequence&&revision===commandSequence&&pendingCommands.size===0)statusEl.textContent='Disconnected'})}
+sensorsEl.innerHTML=names.map(k=>`<label>${k.toUpperCase()} <span class="value" id="${k}V"></span></label><input id="${k}" type="range" min="0" max="100" oninput="show(this)" onchange="cmd('${k}',this.value)">`).join('');
+fetch('/api/profiles',{cache:'no-store'}).then(r=>r.json()).then(p=>{profiles=p;brandEl.innerHTML=brands().map(b=>`<option value="${esc(b)}">${esc(b)}</option>`).join('');if(p.length){brandEl.value=p[0].brand;fillModels(p[0].brand)}refresh()}).catch(()=>{statusEl.textContent='Disconnected';refresh()});
+setInterval(refresh,1000);
+</script></body></html>

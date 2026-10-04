@@ -1,0 +1,208 @@
+{
+  "installerSha256": "6D84842B2137C22B16F5F0E7B199EEF1CA1EDEC3FB5DC83B58673BBE13C36E92",
+  "powershell": "7.6.5",
+  "passed": 28,
+  "failed": 0,
+  "noUi": true,
+  "noCom": true,
+  "noToolExecution": true,
+  "fixtureOnly": true,
+  "cases": [
+    {
+      "case": "known-hash data fixture accepted without executing it",
+      "expectedAccept": true,
+      "actualAccept": true,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "case": "uppercase known hash accepted",
+      "expectedAccept": true,
+      "actualAccept": true,
+      "pass": true,
+      "error": ""
+    },
+    {
+      "case": "unapproved refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This package is not approved for release."
+    },
+    {
+      "case": "string true refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This package is not approved for release."
+    },
+    {
+      "case": "numeric approval refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This package is not approved for release."
+    },
+    {
+      "case": "wrong schema refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This package is not approved for release."
+    },
+    {
+      "case": "missing firmware refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Package file is missing: firmware/missing.bin"
+    },
+    {
+      "case": "missing tool refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Package file is missing: tools/esptool.exe"
+    },
+    {
+      "case": "relative escape with existing outside file refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "File path escapes package."
+    },
+    {
+      "case": "absolute existing file refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Manifest file paths must be relative to the package."
+    },
+    {
+      "case": "firmware directory refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Package file is missing: firmware"
+    },
+    {
+      "case": "wrong image hash refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "SHA256 mismatch: C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\release-fixture-33536fcf5e054dd082036d46990ba70b\\package\\firmware\\fixture.bin"
+    },
+    {
+      "case": "malformed image hash refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Manifest must contain a real SHA256 hash."
+    },
+    {
+      "case": "tampered image refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "SHA256 mismatch: C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\release-fixture-33536fcf5e054dd082036d46990ba70b\\package\\firmware\\fixture.bin"
+    },
+    {
+      "case": "tampered tool refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "SHA256 mismatch: C:\\Users\\Admin\\Documents\\ChatGPT\\ESP32 Code CMP CKP\\customer-installer\\tests\\release-fixture-33536fcf5e054dd082036d46990ba70b\\package\\tools\\esptool.exe"
+    },
+    {
+      "case": "empty image with correct empty hash refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Firmware image is empty."
+    },
+    {
+      "case": "application-only image refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "A build-verified merged image is required."
+    },
+    {
+      "case": "wrong chip refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This installer supports only the approved ESP32 target."
+    },
+    {
+      "case": "chip case mismatch refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "This installer supports only the approved ESP32 target."
+    },
+    {
+      "case": "null offset refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Exact merged image offset must be supplied by the build manifest."
+    },
+    {
+      "case": "numeric offset refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Exact merged image offset must be supplied by the build manifest."
+    },
+    {
+      "case": "decimal offset refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Exact merged image offset must be supplied by the build manifest."
+    },
+    {
+      "case": "offset command injection refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Exact merged image offset must be supplied by the build manifest."
+    },
+    {
+      "case": "offset over 32 bits refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Exact merged image offset must be supplied by the build manifest."
+    },
+    {
+      "case": "unbuilt version refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Firmware version is missing."
+    },
+    {
+      "case": "unpinned tool version refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "A pinned, packaged esptool v5 executable is required."
+    },
+    {
+      "case": "alternate tool path refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "A pinned, packaged esptool v5 executable is required."
+    },
+    {
+      "case": "invalid UI URL refused",
+      "expectedAccept": false,
+      "actualAccept": false,
+      "pass": true,
+      "error": "Wi-Fi connection instructions are incomplete."
+    }
+  ]
+}
