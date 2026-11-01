@@ -1,5 +1,6 @@
 /* Mega 2560 bench waveform bring-up ONLY.
  * D7: 36-slot / 2 missing CKP test. D2: CMP paired automatically on START.
+ * D3: optional free-running IGF TEST, 4 pulses/720 degrees; NOT IGT feedback.
  * D5/D6/D8: TPS/MAP/MAF test PWM, NOT DAC voltages or ECU-ready outputs.
  * Both pins are high impedance during reset/bootloader. Interface must default off.
  * Not an ECU-qualified 89661-02860 profile. No CAM phase is assumed.
@@ -24,6 +25,8 @@ volatile uint8_t camPhase = 0;
 volatile uint8_t camWidth = 2;
 volatile uint32_t ckpEdges = 0;
 volatile uint32_t cmpEdges = 0;
+volatile bool igfEnabled = true;
+volatile uint32_t igfEdges = 0;
 volatile uint16_t pendingTop = 0;
 volatile bool speedPending = false;
 const uint8_t sensorPins[3] = {5, 6, 8}; // Timer3A, Timer4A, Timer4C.
@@ -49,6 +52,12 @@ ISR(TIMER1_COMPA_vect) {
     PORTE |= _BV(PE4);
     if (camOffset == 0) ++cmpEdges;
   } else PORTE &= ~_BV(PE4);
+  // Synthetic bench signal only: one 5-degree HIGH pulse every 180 degrees.
+  // Not tied to ECU IGT, spark current or ignition-coil confirmation.
+  uint8_t igfOffset = (halfSlot + 36U - 18U) % 36U;
+  if (running && igfEnabled && igfOffset == 0) {
+    PORTE |= _BV(PE5); ++igfEdges; // Mega D3 = PE5.
+  } else PORTE &= ~_BV(PE5);
   halfSlot = (halfSlot + 1) % 144;
 }
 
@@ -67,6 +76,7 @@ void stopOutput() {
     TIMSK1 &= ~_BV(OCIE1A);
     PORTH &= ~_BV(PH4);
     PORTE &= ~_BV(PE4);
+    PORTE &= ~_BV(PE5);
     halfSlot = 0;
   }
 }
@@ -149,7 +159,7 @@ void command() {
       camEnabled = true;
       if (!running) {
         halfSlot = 0; TCNT1 = 0;
-        ckpEdges = 0; cmpEdges = 0;
+        ckpEdges = 0; cmpEdges = 0; igfEdges = 0;
         TIFR1 = _BV(OCF1A);
         running = true; TIMSK1 |= _BV(OCIE1A);
       }
@@ -169,24 +179,41 @@ void command() {
     camPhase = 0; camWidth = 2; camEnabled = true;
     Serial.println(F("ACK PROFILE TOYOTA_3ZZ_TEST"));
     Serial.println(F("CKP D7 CMP D2; LOGIC 0-VCC (~5V); TEST PHASE 0 WIDTH 2 UNVERIFIED"));
+  } else if (!strcmp(line, "IGF ON") || !strcmp(line, "IGF OFF")) {
+    bool enable = !strcmp(line, "IGF ON");
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      igfEnabled = enable;
+      if (!enable) PORTE &= ~_BV(PE5);
+    }
+    Serial.println(enable ? F("ACK IGF ON") : F("ACK IGF OFF"));
+    Serial.println(F("IGF TEST ONLY D3; 4 PULSES/720; NOT IGT FEEDBACK"));
   } else if (!strcmp(line, "STATS")) {
-    uint32_t crankCount, camCount;
-    uint8_t ckpLevel, cmpLevel;
+    uint32_t crankCount, camCount, igfCount;
+    uint8_t ckpLevel, cmpLevel, igfLevel, igfSetting;
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
       crankCount = ckpEdges; camCount = cmpEdges;
       ckpLevel = (PINH & _BV(PH4)) ? 1 : 0;
       cmpLevel = (PINE & _BV(PE4)) ? 1 : 0;
+      igfCount = igfEdges;
+      igfLevel = (PINE & _BV(PE5)) ? 1 : 0;
+      igfSetting = igfEnabled ? 1 : 0;
     }
     Serial.print(F("STATS CKP ")); Serial.print(crankCount);
     Serial.print(F(" CMP ")); Serial.print(camCount);
     Serial.print(F(" D7 ")); Serial.print(ckpLevel);
     Serial.print(F(" D2 ")); Serial.println(cmpLevel);
+    Serial.print(F("IGFSTATS EDGES ")); Serial.print(igfCount);
+    Serial.print(F(" D3 ")); Serial.print(igfLevel);
+    Serial.print(F(" ENABLED ")); Serial.println(igfSetting);
   } else if (!strncmp(line, "SENSOR ", 7)) {
     sensorCommand(line + 7);
   } else if (!strncmp(line, "CAM ", 4)) {
     camCommand(line + 4);
   } else if (!strcmp(line, "CONFIG")) {
     Serial.println(F("CONFIG PINS CKP 7 CMP 2 TPS 5 MAP 6 MAF 8; LOGIC 0-VCC NOT MEASURED"));
+    Serial.print(F("CONFIG IGF TEST D3 "));
+    Serial.print(igfEnabled ? F("ON") : F("OFF"));
+    Serial.println(F(" 4/720 WIDTH5DEG PHASE90DEG; NOT IGT FEEDBACK"));
     Serial.print(F("CONFIG CAM "));
     if (!camEnabled) Serial.println(F("OFF"));
     else {
@@ -202,7 +229,7 @@ void command() {
     Serial.print(rpm);
     Serial.println(camEnabled ? F(" RPM; CAM TEST ENABLED; ECU UNVERIFIED") :
                                 F(" RPM; CAM DISABLED; ECU UNVERIFIED"));
-  } else Serial.println(F("Commands: RPM | START | STOP | STATUS | CONFIG | SENSOR | CAM | PROFILE | STATS"));
+  } else Serial.println(F("Commands: RPM | START | STOP | STATUS | CONFIG | SENSOR | CAM | PROFILE | STATS | IGF ON/OFF"));
 }
 
 void setup() {
@@ -210,6 +237,7 @@ void setup() {
   pinMode(11, INPUT); pinMode(12, INPUT);
   pinMode(7, OUTPUT); pinMode(2, OUTPUT);
   digitalWrite(7, LOW); digitalWrite(2, LOW);
+  pinMode(3, OUTPUT); digitalWrite(3, LOW); // Detach Timer3C PWM for IGF test.
   for (uint8_t i = 0; i < 3; ++i) pinMode(sensorPins[i], OUTPUT);
   TCCR1A = 0; TCCR1B = _BV(WGM12) | _BV(CS11);
   stopAll(); setSpeed(rpm);

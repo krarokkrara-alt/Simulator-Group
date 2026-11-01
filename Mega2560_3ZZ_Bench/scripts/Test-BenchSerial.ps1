@@ -68,6 +68,10 @@ try {
     if ($statsReply -notmatch 'STATS CKP ([0-9]+) CMP ([0-9]+) D7 [01] D2 [01]') { throw 'STATS response missing' }
     if ([int]$Matches[1] -lt 100 -or [int]$Matches[2] -lt 1) { throw 'CKP/CMP software counters did not advance' }
     $beforeLive = [int]$Matches[1]
+    $cmpCount = [int]$Matches[2]
+    if ($statsReply -notmatch 'IGFSTATS EDGES ([0-9]+) D3 [01] ENABLED 1') { throw 'IGF stats missing or disabled by default' }
+    $igfCount = [int]$Matches[1]
+    if ($igfCount -lt 1 -or [Math]::Abs($igfCount - 4 * $cmpCount) -gt 4) { throw 'IGF test count is not four pulses per 720 degrees' }
     Assert-Reply 'RPM 2500' 'RPM SET'
     Assert-Reply 'STATUS' 'RUN 2500 RPM; CAM TEST ENABLED; ECU UNVERIFIED'
     Assert-Reply 'RPM 300' 'RPM SET'
@@ -76,7 +80,30 @@ try {
     $liveStats = Read-Probe
     if ($liveStats -notmatch 'STATS CKP ([0-9]+) CMP ([0-9]+) D7 [01] D2 [01]') { throw 'Live STATS missing' }
     if ([int]$Matches[1] -le $beforeLive) { throw 'Live RPM reset or stalled CKP counter' }
+    Assert-Reply 'IGF OFF' 'ACK IGF OFF'
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $offStats = Read-Probe
+    if ($offStats -notmatch 'IGFSTATS EDGES ([0-9]+) D3 0 ENABLED 0') { throw 'IGF OFF did not report D3 LOW' }
+    $offCount = [int]$Matches[1]
+    Start-Sleep -Milliseconds 200
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $offStats = Read-Probe
+    if ($offStats -notmatch 'IGFSTATS EDGES ([0-9]+) D3 0 ENABLED 0' -or [int]$Matches[1] -ne $offCount) { throw 'IGF count advanced while disabled' }
+    Assert-Reply 'STATUS' 'RUN 300 RPM; CAM TEST ENABLED; ECU UNVERIFIED'
+    Assert-Reply 'IGF ON' 'ACK IGF ON'
+    Start-Sleep -Milliseconds 300
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $onStats = Read-Probe
+    if ($onStats -notmatch 'IGFSTATS EDGES ([0-9]+) D3 [01] ENABLED 1' -or [int]$Matches[1] -le $offCount) { throw 'IGF ON did not resume pulses' }
     Assert-Reply 'STOP' 'STOPPED'
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $stopStats = Read-Probe
+    if ($stopStats -notmatch 'IGFSTATS EDGES ([0-9]+) D3 0 ENABLED 1') { throw 'STOP did not report IGF LOW' }
+    $stoppedCount = [int]$Matches[1]
+    Start-Sleep -Milliseconds 200
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $stopStats = Read-Probe
+    if ($stopStats -notmatch 'IGFSTATS EDGES ([0-9]+) D3 0 ENABLED 1' -or [int]$Matches[1] -ne $stoppedCount) { throw 'IGF continued after STOP' }
     Assert-Reply 'CAM OFF' 'ACK CAM OFF'
     Write-Host 'PASS: command acknowledgements, range checks, STOP and timeouts. Waveforms not measured.'
 } finally {

@@ -6,6 +6,8 @@
 
 ## สถานะ
 
+รุ่น2พฤศจิกายน2026 เพิ่ม **IGF test D3**: STARTเริ่มพร้อมCKP/CMP, STOP/timeoutหยุดทั้งหมด มีIGF ON/OFFแยกขณะRUN ดู [วิธีใช้และผลทดสอบIGF](docs/IGF-test.md) เป็นพัลส์สังเคราะห์4ครั้ง/720องศา ไม่ใช่IGFตอบกลับIGT รุ่นนี้compile/uploadCOM4และSerial regressionผ่าน Flash8372bytes/RAM387bytes
+
 โปรเจกต์นี้ยัง **ไม่พร้อมต่อ ECU** รุ่นซอร์สล่าสุดเพิ่ม CAM test แบบตั้งเฟสได้ (START เปิดคู่ CKP อัตโนมัติ) และ PWM test สำหรับ TPS/MAP/MAF โดยยังไม่ยืนยันเฟส CAM หรือวัดแรงดันจริง THW/THA ต้องใช้ความต้านทานภายนอก และ Mega ไม่ใช้เป็นโหลดคอยล์/หัวฉีด ดู [รายการช่องและวงจร](docs/Sensor-plan-3ZZ.md)
 
 ติดตั้ง Arduino CLI 1.5.2-rc.1 และ AVR core 1.8.8 แล้ว รุ่นเพิ่ม sensor/CAM คอมไพล์สำหรับ Mega 2560 ผ่าน: Flash 7,842 bytes, RAM 371 bytes ผู้ใช้ยืนยันเหลือเฉพาะ USB และอัปโหลด COM4 สำเร็จแล้ว ทดสอบ Serial ด้วย scripts/Test-BenchSerial.ps1 ผ่าน รวม sensor/CAM ACK, คำสั่งผิดช่วง, STOP และ timeout จบด้วย STOP / SENSOR OFF / CAM OFF ยังไม่ได้วัดรูปคลื่นหรือทดสอบ ECU

@@ -58,7 +58,7 @@ $connect = Add-Button 'Connect' 302 148 120 32
 $disconnect = Add-Button 'Disconnect' 434 148 130 32
 $state = Add-Label 'DISCONNECTED' 24 198 780 30
 $state.Font = New-Object System.Drawing.Font('Segoe UI',13,[System.Drawing.FontStyle]::Bold)
-$pins = Add-Label 'CKP D7 | CMP D2 | TPS D5 | MAP D6 | MAF D8 | CKP/CMP ~5 Vpp nominal; unmeasured' 24 228 780 20
+$pins = Add-Label 'CKP D7 | CMP D2 | IGF D3 | TPS D5 | MAP D6 | MAF D8 | 0-Vcc nominal ~5V' 24 228 780 20
 $null = Add-Label 'RPM (100 - 6000)' 24 248 180 24
 $rpm = New-Object System.Windows.Forms.NumericUpDown
 $rpm.Minimum = 100; $rpm.Maximum = 6000; $rpm.Value = 800; $rpm.Increment = 100
@@ -75,7 +75,7 @@ $rpmSlider.SmallChange = 100; $rpmSlider.LargeChange = 500; $rpmSlider.TickFrequ
 $rpmSlider.SetBounds(600,270,208,52); $form.Controls.Add($rpmSlider)
 $loadProfile = Add-Button 'Load Toyota CKP+CMP test' 596 278 212 42
 $tooltips = New-Object System.Windows.Forms.ToolTip
-$tooltips.SetToolTip($start,'START enables CKP D7 and CMP D2 together, nominal 0-Vcc (~5V). Keepalive every second; stops after 5s without START. Actual Vpp unmeasured.')
+$tooltips.SetToolTip($start,'START enables CKP D7 + CMP D2 and IGF TEST D3 if enabled, nominal 0-Vcc (~5V). IGF OFF persists across STOP/START; reset defaults ON. NOT IGT feedback. Keepalive every second; stops after 5s without START. Actual Vpp unmeasured.')
 $tooltips.SetToolTip($pins,'CKP/CMP nominal logic 0-5 V (~5 Vpp) into a high-impedance instrument. Actual amplitude must be measured; no direct ECU connection.')
 $tooltips.SetToolTip($loadProfile,'Explicit bench preset: RPM 800, CAM phase 0, width 2. Loading does not START output. CAM phase is not validated for this ECU.')
 $hint = Add-Label 'Connect, wait for STOP, load test preset or Apply RPM, then START. Reconnect never starts output. Measure actual Vpp with a high-impedance scope.' 24 332 780 42
@@ -88,6 +88,15 @@ $camTab.Text = 'CAM test configuration'
 $diagnosticsTab = New-Object System.Windows.Forms.TabPage
 $diagnosticsTab.Text = 'Diagnostics / software counters'
 $tabs.TabPages.Add($sensorTab); $tabs.TabPages.Add($camTab); $tabs.TabPages.Add($diagnosticsTab)
+$igfTab = New-Object System.Windows.Forms.TabPage
+$igfTab.Text = 'IGF TEST'
+$tabs.TabPages.Add($igfTab)
+$igfNote = Add-Label 'D3: free-running IGF TEST, 4 pulses / 720 degrees, width 5 crank degrees. NOT IGT-triggered or ECU-qualified.' 12 8 730 48 $igfTab
+$igfNote.ForeColor = [System.Drawing.Color]::DarkRed
+$igfOn = Add-Button 'IGF ON' 12 66 140 34 $igfTab
+$igfOff = Add-Button 'IGF OFF' 166 66 140 34 $igfTab
+$igfState = Add-Label 'Reset defaults ON; IGF OFF persists across STOP/START. Configuration unconfirmed. STOP/timeout ends pulses.' 12 108 730 36 $igfTab
+$igfStats = Add-Label 'Software counters not read. D3 logic 0-Vcc nominal ~5V; waveform/Vpp unmeasured.' 12 148 730 40 $igfTab
 $diagnostics = Add-Button 'Read software counters' 12 12 220 34 $diagnosticsTab
 $statsLabel = Add-Label 'Counters not read. This does not measure physical output.' 12 62 730 66 $diagnosticsTab
 $statsNote = Add-Label 'STATS reports firmware counters and pin logic only. Use a high-impedance oscilloscope to measure waveform and actual Vpp.' 12 132 730 50 $diagnosticsTab
@@ -145,6 +154,8 @@ function Update-Controls {
     $start.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0 -and $script:appliedRpm -eq [int]$rpm.Value
     $loadProfile.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0
     $diagnostics.Enabled = $isOpen -and $readyForInput
+    $igfOn.Enabled = $isOpen -and $readyForInput
+    $igfOff.Enabled = $isOpen -and $readyForInput
     foreach ($name in $script:sensorInputs.Keys) {
         $script:sensorInputs[$name].Enabled = $isOpen -and $readyForInput
         $script:sensorApply[$name].Enabled = $isOpen -and $readyForInput
@@ -170,6 +181,8 @@ function Close-Serial([string]$reason) {
         $script:serial = $null
     }
     $camState.Text = 'CAM configuration unconfirmed'
+    $igfState.Text = 'Disconnected; IGF configuration unconfirmed'
+    $igfStats.Text = 'Software counters unavailable; physical D3 output unmeasured'
     $statsLabel.Text = 'Disconnected. Counters are software only; physical output unmeasured.'
     $state.Text = 'DISCONNECTED - ' + $reason; Write-Log $reason; Update-Controls
 }
@@ -242,6 +255,14 @@ $diagnostics.Add_Click({
     try { Send-Command 'STATS'; Write-Log 'TX STATS (software counters only)' }
     catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
+$igfOn.Add_Click({
+    try { Send-Command 'IGF ON'; $igfState.Text = 'IGF ON requested; waiting for ACK'; Write-Log 'TX IGF ON (free-running TEST only)' }
+    catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
+})
+$igfOff.Add_Click({
+    try { Send-Command 'IGF OFF'; $igfState.Text = 'IGF OFF requested; waiting for ACK'; Write-Log 'TX IGF OFF' }
+    catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
+})
 foreach ($name in $script:sensorApply.Keys) {
     $script:sensorApply[$name].Add_Click({
         param($sender,$eventArgs)
@@ -273,7 +294,7 @@ $start.Add_Click({
     try {
         $script:wantsRun = $true; $script:lastKeepalive = [datetime]::UtcNow
         Send-Command 'START'; Send-Command 'STATUS'
-        $state.Text = 'START CKP + CMP requested - waiting for RUN status'; Write-Log 'TX START (CKP D7 + CMP D2)'; Update-Controls
+        $state.Text = 'START CKP + CMP requested (IGF if enabled) - waiting for RUN'; Write-Log 'TX START (CKP D7 + CMP D2 + IGF TEST D3 if enabled)'; Update-Controls
     } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
 $stop.Add_Click({
@@ -330,6 +351,11 @@ $timer.Add_Tick({
                 } elseif ($message -match '^STATS CKP ([0-9]+) CMP ([0-9]+) D7 ([01]) D2 ([01])$') {
                     $statsLabel.Text = 'SOFTWARE ONLY: CKP count ' + $Matches[1] + ' | CMP count ' + $Matches[2] +
                         "`r`nPin logic snapshot: D7=" + $Matches[3] + ' D2=' + $Matches[4] + ' | Actual waveform/Vpp unmeasured'
+                } elseif ($message -match '^IGFSTATS EDGES ([0-9]+) D3 ([01]) ENABLED ([01])$') {
+                    $igfStats.Text = 'SOFTWARE ONLY: IGF edges ' + $Matches[1] + ' | D3=' + $Matches[2] + ' | enabled=' + $Matches[3] + '; actual waveform/Vpp unmeasured'
+                } elseif ($message -match '^ACK IGF (ON|OFF)$') {
+                    if ($Matches[1] -eq 'ON') { $igfState.Text = 'ACK IGF ON: free-running TEST enabled; pulses only during RUN' }
+                    else { $igfState.Text = 'ACK IGF OFF: test disabled' }
                 } elseif ($message -match '^(?:ACK )?SENSOR (TPS|MAP|MAF) ([0-9]+) mV$') {
                     # Sensor acknowledgement never changes pending/applied RPM.
                     $sensor = $Matches[1]; $value = [int]$Matches[2]
@@ -345,6 +371,7 @@ $timer.Add_Tick({
                     $script:sensorStatus[$sensor].Text = 'PWM OFF: timeout; apply again'
                 } elseif ($message -eq 'STOPPED') {
                     Clear-SensorRequests 'PWM OFF (STOP confirmed)'
+                    $igfState.Text = 'STOP confirmed: IGF pulses stopped; configuration shown by STATS'
                 } elseif ($message -match '^(?:ACK )?CAM OFF$') {
                     $camState.Text = 'CMP disarmed while stopped; START enables it'
                 } elseif ($message -match '^(?:ACK )?CAM ([0-9]+) ([0-9]+)') {
