@@ -8,7 +8,7 @@
 
 โปรเจกต์นี้ยัง **ไม่พร้อมต่อ ECU** รุ่นซอร์สล่าสุดเพิ่ม CAM test แบบตั้งเฟสได้ (ปิดเริ่มต้น) และ PWM test สำหรับ TPS/MAP/MAF โดยยังไม่ยืนยันเฟส CAM หรือวัดแรงดันจริง THW/THA ต้องใช้ความต้านทานภายนอก และ Mega ไม่ใช้เป็นโหลดคอยล์/หัวฉีด ดู [รายการช่องและวงจร](docs/Sensor-plan-3ZZ.md)
 
-ติดตั้ง Arduino CLI 1.5.2-rc.1 และ AVR core 1.8.8 แล้ว รุ่นเพิ่ม sensor/CAM คอมไพล์สำหรับ Mega 2560 ผ่าน: Flash 7,820 bytes, RAM 368 bytes ผู้ใช้ยืนยันเหลือเฉพาะ USB และอัปโหลด COM4 สำเร็จแล้ว ทดสอบ Serial ด้วย scripts/Test-BenchSerial.ps1 ผ่าน รวม sensor/CAM ACK, คำสั่งผิดช่วง, STOP และ timeout จบด้วย STOP / SENSOR OFF / CAM OFF ยังไม่ได้วัดรูปคลื่นหรือทดสอบ ECU
+ติดตั้ง Arduino CLI 1.5.2-rc.1 และ AVR core 1.8.8 แล้ว รุ่นเพิ่ม sensor/CAM คอมไพล์สำหรับ Mega 2560 ผ่าน: Flash 7,834 bytes, RAM 371 bytes ผู้ใช้ยืนยันเหลือเฉพาะ USB และอัปโหลด COM4 สำเร็จแล้ว ทดสอบ Serial ด้วย scripts/Test-BenchSerial.ps1 ผ่าน รวม sensor/CAM ACK, คำสั่งผิดช่วง, STOP และ timeout จบด้วย STOP / SENSOR OFF / CAM OFF ยังไม่ได้วัดรูปคลื่นหรือทดสอบ ECU
 
 ผลตรวจเฟิร์มแวร์ CKP รุ่นก่อนหน้า 1 พฤศจิกายน 2026: COM3 เป็น Intel Active Management Technology SOL; COM4 เป็น USB-SERIAL CH340 (VID 1A86 / PID 7523) สถานะ Windows OK ผู้ใช้ยืนยันถอด ECU/PD60 และวงจรภายนอก เหลือเฉพาะ USB ก่อนทดสอบ อัปโหลดไป COM4 สำเร็จ (exit code 0) และ Serial 115200 ตอบ STATUS, RPM 800, START, STOP ถูกต้อง ทดสอบไม่ส่ง START ซ้ำแล้วพบ `STOP: START timeout` และ STATUS เป็น STOP บอร์ดถูกสั่ง STOP เมื่อจบทดสอบ
 
@@ -38,7 +38,7 @@
 
 สคริปต์ดาวน์โหลด CLI จาก Arduino และติดตั้ง arduino:avr ผ่าน CLI ไม่มีไลบรารีภายนอกสำหรับ sketch นี้ หากไม่พบพอร์ต ต้องตรวจสาย USB และชนิดชิป USB ก่อนเลือกไดรเวอร์ ไม่ติดตั้งไดรเวอร์ CH340 โดยเดาว่าทุกบอร์ดใช้ชิปนี้
 
-เปิด Serial Monitor 115200 baud เลือก newline ป้อน `STATUS`, `RPM 800`, `START`, `STOP` ขณะเริ่มและรีเซ็ตเอาต์พุตหยุด ต้องส่ง START ซ้ำภายใน 5 วินาทีเพื่อให้ทำงานต่อ เปลี่ยน RPM ได้เฉพาะตอน STOP ช่วง 100–6000 RPM
+เปิด Serial Monitor 115200 baud เลือก newline ป้อน `STATUS`, `RPM 800`, `START`, `STOP` ขณะเริ่มและรีเซ็ตเอาต์พุตหยุด ต้องส่ง START ซ้ำภายใน 5 วินาทีเพื่อให้ทำงานต่อ เปลี่ยน RPM ระหว่าง RUN ได้ ช่วง 100–6000 RPM โดยไม่รีเซ็ตตำแหน่งพัลส์
 
 ต่อเฉพาะเครื่องวัดลอจิก/ออสซิลโลสโคป: D7 เป็น CKP ทดสอบ 36 ช่อง เว้นสองช่องท้าย; D2 LOW หลัง setup จนกำหนด CAM และ START ใช้ GND ของ Mega เป็นจุดอ้างอิงเครื่องวัดบนโต๊ะ ที่ 800 RPM ต้องวัดคาบหนึ่งรอบประมาณ 75 ms, พัลส์ 34 ลูก/รอบ และช่วง rising edge ข้ามฟันที่หายประมาณ 6.25 ms ตรวจ STOP, timeout และ reset ว่าสัญญาณหยุดจริง
 

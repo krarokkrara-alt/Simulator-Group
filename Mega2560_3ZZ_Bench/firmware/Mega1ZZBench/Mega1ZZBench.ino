@@ -24,6 +24,8 @@ volatile uint8_t camPhase = 0;
 volatile uint8_t camWidth = 1;
 volatile uint32_t ckpEdges = 0;
 volatile uint32_t cmpEdges = 0;
+volatile uint16_t pendingTop = 0;
+volatile bool speedPending = false;
 const uint8_t sensorPins[3] = {5, 6, 8}; // Timer3A, Timer4A, Timer4C.
 uint16_t sensorMv[3] = {0, 0, 0};
 unsigned long sensorUpdatedAt[3] = {0, 0, 0};
@@ -34,6 +36,8 @@ uint8_t used = 0;
 bool overflowed = false;
 
 ISR(TIMER1_COMPA_vect) {
+  // Apply at a tooth half-slot boundary, without resetting angle or the timer.
+  if (speedPending) { OCR1A = pendingTop; speedPending = false; }
   // Mega D7 = PH4, D2 = PE4. PWM hardware is detached by setup digitalWrite.
   uint8_t crankSlot = halfSlot % 72;
   if (running && crankSlot < 68 && !(crankSlot & 1)) {
@@ -127,8 +131,8 @@ void setSpeed(uint16_t value) {
   uint16_t top = (120000000UL + (uint32_t)value * 36UL) /
                  ((uint32_t)value * 72UL) - 1;
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    OCR1A = top;
-    TCNT1 = 0;
+    if (running) { pendingTop = top; speedPending = true; }
+    else { OCR1A = top; TCNT1 = 0; speedPending = false; }
   }
   rpm = value;
 }
@@ -153,8 +157,6 @@ void command() {
     long value = strtol(line + 4, &end, 10);
     if (end == line + 4 || *end || value < 100 || value > 6000) {
       Serial.println(F("ERROR RPM range 100..6000"));
-    } else if (running) {
-      Serial.println(F("ERROR STOP before changing RPM"));
     } else {
       setSpeed((uint16_t)value); Serial.println(F("RPM SET"));
     }

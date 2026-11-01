@@ -2,7 +2,8 @@
 
 1 พฤศจิกายน 2026
 
-- Arduino Mega 2560 รุ่นย้ายCKP D7/CMP D2/MAF D8 compile: exit0, Flash7820 bytes, RAM368 bytes และ upload COM4 exit0
+- Arduino Mega 2560 รุ่น Live RPM CKP D7/CMP D2/MAF D8 compile: exit0, Flash7834 bytes, RAM371 bytes และ upload COM4 exit0
+- ทดสอบปรับ800→2500→300RPM ขณะRUN: ACKและRUN statusถูกต้อง CKP countเพิ่ม305→563, CMP5→9 โดยไม่รีเซ็ตตัวนับ จบSTOP/CAM OFF ทดสอบนี้ไม่ใช่การวัดjitterหรือรูปคลื่นด้วยสโคป
 - ทดสอบ PROFILE TOYOTA_3ZZ_TEST และ CONFIG ยืนยันขาใหม่ ผ่าน STATS หลัง START ได้ CKP301 CMP5, snapshot D7=1 D2=0 นี่คือตัวนับ ISR และการอ่านขาดิจิทัลชั่วขณะ ไม่ใช่การวัดรูปคลื่น/Vpp
 - PowerShell Control-Panel.ps1 -ValidateOnly: exit 0, WinForms dependencies loaded; script parsed
 - ตรวจข้อความ protocol UI รองรับ ACK SENSOR, SENSOR OFF, SENSOR TIMEOUT, ACK CAM และ STATUS ทั้ง CAM DISABLED/TEST ENABLED

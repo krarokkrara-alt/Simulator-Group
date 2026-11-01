@@ -21,6 +21,8 @@ $script:lastTick = [datetime]::UtcNow
 $script:activeSensors = @{}
 $script:pendingSensors = @{}
 $script:lastSensorKeepalive = [datetime]::MinValue
+$script:lastRpmSend = [datetime]::MinValue
+$script:syncRpm = $false
 $script:pendingProfile = $false
 $script:profileRequestedAt = [datetime]::MinValue
 
@@ -66,6 +68,11 @@ $start = Add-Button 'START' 330 278 120 42
 $start.BackColor = [System.Drawing.Color]::Honeydew
 $stop = Add-Button 'STOP' 464 278 120 42
 $stop.BackColor = [System.Drawing.Color]::MistyRose
+$null = Add-Label 'Live RPM while RUN' 600 244 208 24
+$rpmSlider = New-Object System.Windows.Forms.TrackBar
+$rpmSlider.Minimum = 100; $rpmSlider.Maximum = 6000; $rpmSlider.Value = 800
+$rpmSlider.SmallChange = 100; $rpmSlider.LargeChange = 500; $rpmSlider.TickFrequency = 1000
+$rpmSlider.SetBounds(600,270,208,52); $form.Controls.Add($rpmSlider)
 $loadProfile = Add-Button 'Load Toyota CKP+CMP test' 596 278 212 42
 $tooltips = New-Object System.Windows.Forms.ToolTip
 $tooltips.SetToolTip($start,'START enables output and sends keepalive every second. Firmware stops after 5 seconds without START. Not a hardware safety circuit.')
@@ -132,8 +139,9 @@ function Update-Controls {
     $readyForInput = $script:ready -and !$script:pendingProfile
     $ports.Enabled = !$isOpen; $refresh.Enabled = !$isOpen; $connect.Enabled = !$isOpen -and $ports.Items.Count -gt 0
     $disconnect.Enabled = $isOpen; $stop.Enabled = $isOpen
-    $rpm.Enabled = $readyForInput -and !$script:wantsRun
-    $apply.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0
+    $rpm.Enabled = $readyForInput
+    $rpmSlider.Enabled = $readyForInput
+    $apply.Enabled = $readyForInput -and $script:pendingRpm -eq 0
     $start.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0 -and $script:appliedRpm -eq [int]$rpm.Value
     $loadProfile.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0
     $diagnostics.Enabled = $isOpen -and $readyForInput
@@ -169,6 +177,12 @@ function Send-Command([string]$command) {
     if ($null -eq $script:serial -or !$script:serial.IsOpen) { throw 'Serial port is not connected.' }
     $script:serial.WriteLine($command)
 }
+function Send-RpmTarget {
+    $script:pendingRpm = [int]$rpm.Value
+    $script:pendingAt = [datetime]::UtcNow; $script:lastRpmSend = $script:pendingAt
+    Send-Command ('RPM ' + $script:pendingRpm)
+    Write-Log ('TX RPM ' + $script:pendingRpm)
+}
 function Refresh-Ports {
     $previous = [string]$ports.SelectedItem
     $ports.Items.Clear()
@@ -198,11 +212,23 @@ $connect.Add_Click({
 $disconnect.Add_Click({ Close-Serial 'Disconnected by user (STOP sent where possible).' })
 $apply.Add_Click({
     try {
-        $script:pendingRpm = [int]$rpm.Value; $script:pendingAt = [datetime]::UtcNow
-        Send-Command ('RPM ' + $script:pendingRpm); Write-Log ('TX RPM ' + $script:pendingRpm); Update-Controls
+        Send-RpmTarget; Update-Controls
     } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
-$rpm.Add_ValueChanged({ Update-Controls })
+$rpm.Add_ValueChanged({
+    if (!$script:syncRpm) {
+        $script:syncRpm = $true
+        try { $rpmSlider.Value = [int]$rpm.Value } finally { $script:syncRpm = $false }
+    }
+    Update-Controls
+})
+$rpmSlider.Add_ValueChanged({
+    if (!$script:syncRpm) {
+        $script:syncRpm = $true
+        try { $rpm.Value = $rpmSlider.Value } finally { $script:syncRpm = $false }
+    }
+    Update-Controls
+})
 $loadProfile.Add_Click({
     try {
         Clear-SensorRequests
@@ -347,6 +373,9 @@ $timer.Add_Tick({
             if (($now - $script:lastRx).TotalSeconds -gt 3.5) { throw 'No valid STATUS response for 3.5s; stopping and disconnecting.' }
             if ($script:pendingRpm -gt 0 -and ($now - $script:pendingAt).TotalSeconds -gt 2) { throw 'RPM acknowledgement timeout.' }
             if ($script:pendingProfile -and ($now - $script:profileRequestedAt).TotalSeconds -gt 2) { throw 'Profile acknowledgement timeout.' }
+            if ($script:ready -and $script:wantsRun -and !$script:pendingProfile -and
+                $script:pendingRpm -eq 0 -and [int]$rpm.Value -ne $script:appliedRpm -and
+                ($now - $script:lastRpmSend).TotalMilliseconds -ge 150) { Send-RpmTarget }
             foreach ($sensor in @($script:pendingSensors.Keys)) {
                 if (($now - $script:pendingSensors[$sensor].At).TotalSeconds -gt 2) { throw ('Sensor acknowledgement timeout: ' + $sensor) }
             }

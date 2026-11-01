@@ -62,6 +62,15 @@ try {
     $statsReply = Read-Probe
     if ($statsReply -notmatch 'STATS CKP ([0-9]+) CMP ([0-9]+) D7 [01] D2 [01]') { throw 'STATS response missing' }
     if ([int]$Matches[1] -lt 100 -or [int]$Matches[2] -lt 1) { throw 'CKP/CMP software counters did not advance' }
+    $beforeLive = [int]$Matches[1]
+    Assert-Reply 'RPM 2500' 'RPM SET'
+    Assert-Reply 'STATUS' 'RUN 2500 RPM; CAM TEST ENABLED; ECU UNVERIFIED'
+    Assert-Reply 'RPM 300' 'RPM SET'
+    Assert-Reply 'STATUS' 'RUN 300 RPM; CAM TEST ENABLED; ECU UNVERIFIED'
+    $probe.WriteLine('STATS'); Start-Sleep -Milliseconds 100
+    $liveStats = Read-Probe
+    if ($liveStats -notmatch 'STATS CKP ([0-9]+) CMP ([0-9]+) D7 [01] D2 [01]') { throw 'Live STATS missing' }
+    if ([int]$Matches[1] -le $beforeLive) { throw 'Live RPM reset or stalled CKP counter' }
     Assert-Reply 'STOP' 'STOPPED'
     Assert-Reply 'CAM OFF' 'ACK CAM OFF'
     Write-Host 'PASS: command acknowledgements, range checks, STOP and timeouts. Waveforms not measured.'
