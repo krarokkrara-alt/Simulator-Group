@@ -2,7 +2,8 @@
 
 1 พฤศจิกายน 2026
 
-- Arduino Mega 2560 compile: exit 0, Flash 7104 bytes, RAM 330 bytes
+- Arduino Mega 2560 รุ่นย้ายCKP D7/CMP D2/MAF D8 compile: exit0, Flash7820 bytes, RAM368 bytes และ upload COM4 exit0
+- ทดสอบ PROFILE TOYOTA_3ZZ_TEST และ CONFIG ยืนยันขาใหม่ ผ่าน STATS หลัง START ได้ CKP301 CMP5, snapshot D7=1 D2=0 นี่คือตัวนับ ISR และการอ่านขาดิจิทัลชั่วขณะ ไม่ใช่การวัดรูปคลื่น/Vpp
 - PowerShell Control-Panel.ps1 -ValidateOnly: exit 0, WinForms dependencies loaded; script parsed
 - ตรวจข้อความ protocol UI รองรับ ACK SENSOR, SENSOR OFF, SENSOR TIMEOUT, ACK CAM และ STATUS ทั้ง CAM DISABLED/TEST ENABLED
 - ผู้ใช้ยืนยัน Mega เหลือเฉพาะ USB ก่อนทดสอบ อัปโหลด COM4 สำเร็จ exit 0

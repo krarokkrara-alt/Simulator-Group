@@ -52,6 +52,18 @@ try {
     if (!$timeoutReply.Contains('STOP: START timeout')) { throw 'Crank timeout not observed' }
     Assert-Reply 'STATUS' 'STOP 800 RPM; CAM DISABLED; ECU UNVERIFIED'
     Assert-Reply 'SENSOR OFF' 'SENSOR OFF'
+    Assert-Reply 'PROFILE TOYOTA_3ZZ_TEST' 'ACK PROFILE TOYOTA_3ZZ_TEST'
+    Assert-Reply 'CONFIG' 'CONFIG PINS CKP 7 CMP 2 TPS 5 MAP 6 MAF 8'
+    Assert-Reply 'START' 'BENCH TEST'
+    Start-Sleep -Milliseconds 600
+    $null = $probe.ReadExisting()
+    $probe.WriteLine('STATS')
+    Start-Sleep -Milliseconds 100
+    $statsReply = Read-Probe
+    if ($statsReply -notmatch 'STATS CKP ([0-9]+) CMP ([0-9]+) D7 [01] D2 [01]') { throw 'STATS response missing' }
+    if ([int]$Matches[1] -lt 100 -or [int]$Matches[2] -lt 1) { throw 'CKP/CMP software counters did not advance' }
+    Assert-Reply 'STOP' 'STOPPED'
+    Assert-Reply 'CAM OFF' 'ACK CAM OFF'
     Write-Host 'PASS: command acknowledgements, range checks, STOP and timeouts. Waveforms not measured.'
 } finally {
     if ($probe.IsOpen) {

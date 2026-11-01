@@ -1,6 +1,6 @@
 /* Mega 2560 bench waveform bring-up ONLY.
- * D11: 36-slot / 2 missing CKP logic test. D12: optional CAM test pulse.
- * D5/D6/D7: TPS/MAP/MAF test PWM, NOT DAC voltages or ECU-ready outputs.
+ * D7: 36-slot / 2 missing CKP logic test. D2: optional CMP test pulse.
+ * D5/D6/D8: TPS/MAP/MAF test PWM, NOT DAC voltages or ECU-ready outputs.
  * Both pins are high impedance during reset/bootloader. Interface must default off.
  * Not an ECU-qualified 89661-02860 profile. No CAM phase is assumed.
  * Use an oscilloscope/logic analyzer; never wire directly to ECU NE/G.
@@ -22,7 +22,9 @@ volatile bool running = false;
 volatile bool camEnabled = false;
 volatile uint8_t camPhase = 0;
 volatile uint8_t camWidth = 1;
-const uint8_t sensorPins[3] = {5, 6, 7}; // Timer3A, Timer4A, Timer4B.
+volatile uint32_t ckpEdges = 0;
+volatile uint32_t cmpEdges = 0;
+const uint8_t sensorPins[3] = {5, 6, 8}; // Timer3A, Timer4A, Timer4C.
 uint16_t sensorMv[3] = {0, 0, 0};
 unsigned long sensorUpdatedAt[3] = {0, 0, 0};
 uint16_t rpm = 800;
@@ -32,14 +34,17 @@ uint8_t used = 0;
 bool overflowed = false;
 
 ISR(TIMER1_COMPA_vect) {
-  // Mega D11 = PB5. 68 active half-slots + 4 missing half-slots.
+  // Mega D7 = PH4, D2 = PE4. PWM hardware is detached by setup digitalWrite.
   uint8_t crankSlot = halfSlot % 72;
-  if (running && crankSlot < 68 && !(crankSlot & 1)) PORTB |= _BV(PB5);
-  else PORTB &= ~_BV(PB5);
+  if (running && crankSlot < 68 && !(crankSlot & 1)) {
+    PORTH |= _BV(PH4); ++ckpEdges;
+  } else PORTH &= ~_BV(PH4);
   // Half-slot zero starts CKP tooth zero. CAM phase is UNVERIFIED.
   uint8_t camOffset = (halfSlot + 144U - camPhase) % 144U;
-  if (running && camEnabled && camOffset < camWidth) PORTB |= _BV(PB6);
-  else PORTB &= ~_BV(PB6);
+  if (running && camEnabled && camOffset < camWidth) {
+    PORTE |= _BV(PE4);
+    if (camOffset == 0) ++cmpEdges;
+  } else PORTE &= ~_BV(PE4);
   halfSlot = (halfSlot + 1) % 144;
 }
 
@@ -55,7 +60,8 @@ void stopOutput() {
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     running = false;
     TIMSK1 &= ~_BV(OCIE1A);
-    PORTB &= ~(_BV(PB5) | _BV(PB6));
+    PORTH &= ~_BV(PH4);
+    PORTE &= ~_BV(PE4);
     halfSlot = 0;
   }
 }
@@ -97,7 +103,7 @@ void sensorCommand(char *args) {
 void camCommand(char *args) {
   if (running) { Serial.println(F("ERROR STOP before changing CAM")); return; }
   if (!strcmp(args, "OFF")) {
-    camEnabled = false; digitalWrite(12, LOW);
+    camEnabled = false; digitalWrite(2, LOW);
     Serial.println(F("ACK CAM OFF")); return;
   }
   char *end;
@@ -136,6 +142,7 @@ void command() {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
       if (!running) {
         halfSlot = 0; TCNT1 = 0;
+        ckpEdges = 0; cmpEdges = 0;
         TIFR1 = _BV(OCF1A);
         running = true; TIMSK1 |= _BV(OCIE1A);
       }
@@ -151,11 +158,30 @@ void command() {
     } else {
       setSpeed((uint16_t)value); Serial.println(F("RPM SET"));
     }
+  } else if (!strcmp(line, "PROFILE TOYOTA_3ZZ_TEST")) {
+    if (running) { Serial.println(F("ERROR STOP before changing PROFILE")); return; }
+    stopAll(); setSpeed(800);
+    camPhase = 0; camWidth = 2; camEnabled = true;
+    Serial.println(F("ACK PROFILE TOYOTA_3ZZ_TEST"));
+    Serial.println(F("CKP D7 CMP D2; LOGIC 0-VCC (~5V); TEST PHASE 0 WIDTH 2 UNVERIFIED"));
+  } else if (!strcmp(line, "STATS")) {
+    uint32_t crankCount, camCount;
+    uint8_t ckpLevel, cmpLevel;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      crankCount = ckpEdges; camCount = cmpEdges;
+      ckpLevel = (PINH & _BV(PH4)) ? 1 : 0;
+      cmpLevel = (PINE & _BV(PE4)) ? 1 : 0;
+    }
+    Serial.print(F("STATS CKP ")); Serial.print(crankCount);
+    Serial.print(F(" CMP ")); Serial.print(camCount);
+    Serial.print(F(" D7 ")); Serial.print(ckpLevel);
+    Serial.print(F(" D2 ")); Serial.println(cmpLevel);
   } else if (!strncmp(line, "SENSOR ", 7)) {
     sensorCommand(line + 7);
   } else if (!strncmp(line, "CAM ", 4)) {
     camCommand(line + 4);
   } else if (!strcmp(line, "CONFIG")) {
+    Serial.println(F("CONFIG PINS CKP 7 CMP 2 TPS 5 MAP 6 MAF 8; LOGIC 0-VCC NOT MEASURED"));
     Serial.print(F("CONFIG CAM "));
     if (!camEnabled) Serial.println(F("OFF"));
     else {
@@ -171,12 +197,14 @@ void command() {
     Serial.print(rpm);
     Serial.println(camEnabled ? F(" RPM; CAM TEST ENABLED; ECU UNVERIFIED") :
                                 F(" RPM; CAM DISABLED; ECU UNVERIFIED"));
-  } else Serial.println(F("Commands: RPM | START | STOP | STATUS | CONFIG | SENSOR | CAM"));
+  } else Serial.println(F("Commands: RPM | START | STOP | STATUS | CONFIG | SENSOR | CAM | PROFILE | STATS"));
 }
 
 void setup() {
-  pinMode(11, OUTPUT); pinMode(12, OUTPUT);
-  digitalWrite(11, LOW); digitalWrite(12, LOW);
+  // Retire old outputs, then detach PWM and initialize the new pins LOW.
+  pinMode(11, INPUT); pinMode(12, INPUT);
+  pinMode(7, OUTPUT); pinMode(2, OUTPUT);
+  digitalWrite(7, LOW); digitalWrite(2, LOW);
   for (uint8_t i = 0; i < 3; ++i) pinMode(sensorPins[i], OUTPUT);
   TCCR1A = 0; TCCR1B = _BV(WGM12) | _BV(CS11);
   stopAll(); setSpeed(rpm);

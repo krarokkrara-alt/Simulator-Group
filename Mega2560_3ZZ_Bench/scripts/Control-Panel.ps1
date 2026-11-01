@@ -21,6 +21,8 @@ $script:lastTick = [datetime]::UtcNow
 $script:activeSensors = @{}
 $script:pendingSensors = @{}
 $script:lastSensorKeepalive = [datetime]::MinValue
+$script:pendingProfile = $false
+$script:profileRequestedAt = [datetime]::MinValue
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Mega 2560 | 3ZZ-FE Bench Control'
@@ -42,8 +44,9 @@ function Add-Button($text,$x,$y,$w,$h,$parent = $form) {
 }
 $title = Add-Label 'MEGA 2560  /  BENCH SIGNAL CONTROL' 24 18 780 30
 $title.Font = New-Object System.Drawing.Font('Segoe UI',16,[System.Drawing.FontStyle]::Bold)
-$warning = Add-Label 'BENCH TEST | CAM phase unverified | ECU UNVERIFIED. Never connect directly to ECU NE/G.' 24 58 780 48
+$warning = Add-Label 'BENCH TEST | CAM phase unverified | ECU UNVERIFIED. Never connect directly to ECU NE/G.' 24 58 780 30
 $warning.ForeColor = [System.Drawing.Color]::DarkRed
+$vehicle = Add-Label 'Toyota  |  Altis 3ZZ-FE  |  ECU 89661-02860  |  Test profile, ECU phase unverified' 24 90 780 26
 $null = Add-Label 'Serial port / 115200 baud' 24 120 210 25
 $ports = New-Object System.Windows.Forms.ComboBox
 $ports.DropDownStyle = 'DropDownList'; $ports.SetBounds(24,150,155,30)
@@ -53,6 +56,7 @@ $connect = Add-Button 'Connect' 302 148 120 32
 $disconnect = Add-Button 'Disconnect' 434 148 130 32
 $state = Add-Label 'DISCONNECTED' 24 198 780 30
 $state.Font = New-Object System.Drawing.Font('Segoe UI',13,[System.Drawing.FontStyle]::Bold)
+$pins = Add-Label 'CKP D7 | CMP D2 | TPS D5 | MAP D6 | MAF D8 | CKP/CMP ~5 Vpp nominal; unmeasured' 24 228 780 20
 $null = Add-Label 'RPM (100 - 6000)' 24 248 180 24
 $rpm = New-Object System.Windows.Forms.NumericUpDown
 $rpm.Minimum = 100; $rpm.Maximum = 6000; $rpm.Value = 800; $rpm.Increment = 100
@@ -62,14 +66,25 @@ $start = Add-Button 'START' 330 278 120 42
 $start.BackColor = [System.Drawing.Color]::Honeydew
 $stop = Add-Button 'STOP' 464 278 120 42
 $stop.BackColor = [System.Drawing.Color]::MistyRose
-$hint = Add-Label 'Connect, wait for STOP confirmation, Apply RPM, then START. Reconnect never starts output.' 24 332 780 42
+$loadProfile = Add-Button 'Load Toyota CKP+CMP test' 596 278 212 42
+$tooltips = New-Object System.Windows.Forms.ToolTip
+$tooltips.SetToolTip($start,'START enables output and sends keepalive every second. Firmware stops after 5 seconds without START. Not a hardware safety circuit.')
+$tooltips.SetToolTip($pins,'CKP/CMP nominal logic 0-5 V (~5 Vpp) into a high-impedance instrument. Actual amplitude must be measured; no direct ECU connection.')
+$tooltips.SetToolTip($loadProfile,'Explicit bench preset: RPM 800, CAM phase 0, width 2. Loading does not START output. CAM phase is not validated for this ECU.')
+$hint = Add-Label 'Connect, wait for STOP, load test preset or Apply RPM, then START. Reconnect never starts output. Measure actual Vpp with a high-impedance scope.' 24 332 780 42
 $tabs = New-Object System.Windows.Forms.TabControl
 $tabs.SetBounds(24,380,784,220); $form.Controls.Add($tabs)
 $sensorTab = New-Object System.Windows.Forms.TabPage
 $sensorTab.Text = 'TPS / MAP / MAF'
 $camTab = New-Object System.Windows.Forms.TabPage
 $camTab.Text = 'CAM test configuration'
-$tabs.TabPages.Add($sensorTab); $tabs.TabPages.Add($camTab)
+$diagnosticsTab = New-Object System.Windows.Forms.TabPage
+$diagnosticsTab.Text = 'Diagnostics / software counters'
+$tabs.TabPages.Add($sensorTab); $tabs.TabPages.Add($camTab); $tabs.TabPages.Add($diagnosticsTab)
+$diagnostics = Add-Button 'Read software counters' 12 12 220 34 $diagnosticsTab
+$statsLabel = Add-Label 'Counters not read. This does not measure physical output.' 12 62 730 66 $diagnosticsTab
+$statsNote = Add-Label 'STATS reports firmware counters and pin logic only. Use a high-impedance oscilloscope to measure waveform and actual Vpp.' 12 132 730 50 $diagnosticsTab
+$statsNote.ForeColor = [System.Drawing.Color]::DarkRed
 $sensorWarning = Add-Label 'PWM TEST ONLY. Requires filter/buffer and voltage measurement. NOT ECU-ready.' 8 4 750 38 $sensorTab
 $sensorWarning.ForeColor = [System.Drawing.Color]::DarkRed
 $script:sensorInputs = @{}
@@ -114,20 +129,23 @@ function Write-Log([string]$message) {
 }
 function Update-Controls {
     $isOpen = $null -ne $script:serial -and $script:serial.IsOpen
+    $readyForInput = $script:ready -and !$script:pendingProfile
     $ports.Enabled = !$isOpen; $refresh.Enabled = !$isOpen; $connect.Enabled = !$isOpen -and $ports.Items.Count -gt 0
     $disconnect.Enabled = $isOpen; $stop.Enabled = $isOpen
-    $rpm.Enabled = $script:ready -and !$script:wantsRun
-    $apply.Enabled = $script:ready -and !$script:wantsRun -and $script:pendingRpm -eq 0
-    $start.Enabled = $script:ready -and !$script:wantsRun -and $script:pendingRpm -eq 0 -and $script:appliedRpm -eq [int]$rpm.Value
+    $rpm.Enabled = $readyForInput -and !$script:wantsRun
+    $apply.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0
+    $start.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0 -and $script:appliedRpm -eq [int]$rpm.Value
+    $loadProfile.Enabled = $readyForInput -and !$script:wantsRun -and $script:pendingRpm -eq 0
+    $diagnostics.Enabled = $isOpen -and $readyForInput
     foreach ($name in $script:sensorInputs.Keys) {
-        $script:sensorInputs[$name].Enabled = $isOpen -and $script:ready
-        $script:sensorApply[$name].Enabled = $isOpen -and $script:ready
+        $script:sensorInputs[$name].Enabled = $isOpen -and $readyForInput
+        $script:sensorApply[$name].Enabled = $isOpen -and $readyForInput
     }
-    $sensorsOff.Enabled = $isOpen -and $script:ready
-    $camPhase.Enabled = $script:ready -and !$script:wantsRun
-    $camWidth.Enabled = $script:ready -and !$script:wantsRun
-    $camApply.Enabled = $script:ready -and !$script:wantsRun
-    $camOff.Enabled = $script:ready -and !$script:wantsRun
+    $sensorsOff.Enabled = $isOpen -and $readyForInput
+    $camPhase.Enabled = $readyForInput -and !$script:wantsRun
+    $camWidth.Enabled = $readyForInput -and !$script:wantsRun
+    $camApply.Enabled = $readyForInput -and !$script:wantsRun
+    $camOff.Enabled = $readyForInput -and !$script:wantsRun
 }
 function Clear-SensorRequests([string]$text = 'PWM OFF requested / unconfirmed') {
     $script:activeSensors.Clear(); $script:pendingSensors.Clear()
@@ -136,6 +154,7 @@ function Clear-SensorRequests([string]$text = 'PWM OFF requested / unconfirmed')
 function Close-Serial([string]$reason) {
     $script:wantsRun = $false; $script:ready = $false
     $script:pendingRpm = 0; $script:appliedRpm = 0
+    $script:pendingProfile = $false
     Clear-SensorRequests 'Disconnected / unconfirmed'
     if ($null -ne $script:serial) {
         try { if ($script:serial.IsOpen) { $script:serial.WriteLine('STOP'); $script:serial.WriteLine('SENSOR OFF') } } catch { Write-Log ('STOP/OFF send error: ' + $_.Exception.Message) }
@@ -143,6 +162,7 @@ function Close-Serial([string]$reason) {
         $script:serial = $null
     }
     $camState.Text = 'CAM configuration unconfirmed'
+    $statsLabel.Text = 'Disconnected. Counters are software only; physical output unmeasured.'
     $state.Text = 'DISCONNECTED - ' + $reason; Write-Log $reason; Update-Controls
 }
 function Send-Command([string]$command) {
@@ -168,6 +188,7 @@ $connect.Add_Click({
         $script:openAt = [datetime]::UtcNow; $script:lastRx = $script:openAt
         $script:initialized = $false; $script:ready = $false; $script:wantsRun = $false
         $script:appliedRpm = 0; $script:pendingRpm = 0; $script:rx = ''
+        $script:pendingProfile = $false
         $script:lastTick = $script:openAt
         Clear-SensorRequests 'Not confirmed'
         $state.Text = 'CONNECTING - waiting for board reset...'
@@ -182,6 +203,19 @@ $apply.Add_Click({
     } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
 $rpm.Add_ValueChanged({ Update-Controls })
+$loadProfile.Add_Click({
+    try {
+        Clear-SensorRequests
+        $script:pendingProfile = $true; $script:profileRequestedAt = [datetime]::UtcNow
+        Send-Command 'PROFILE TOYOTA_3ZZ_TEST'
+        $state.Text = 'Loading Toyota bench preset; output will remain stopped'
+        Write-Log 'TX PROFILE TOYOTA_3ZZ_TEST (not a validated ECU phase)'; Update-Controls
+    } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
+})
+$diagnostics.Add_Click({
+    try { Send-Command 'STATS'; Write-Log 'TX STATS (software counters only)' }
+    catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
+})
 foreach ($name in $script:sensorApply.Keys) {
     $script:sensorApply[$name].Add_Click({
         param($sender,$eventArgs)
@@ -218,6 +252,7 @@ $start.Add_Click({
 })
 $stop.Add_Click({
     $script:wantsRun = $false; $script:ready = $false; $script:pendingRpm = 0
+    $script:pendingProfile = $false
     Clear-SensorRequests
     try { Send-Command 'STOP'; Send-Command 'STATUS'; $state.Text = 'STOP requested'; Write-Log 'TX STOP'; Update-Controls }
     catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
@@ -259,6 +294,16 @@ $timer.Add_Tick({
                         elseif ($script:wantsRun) { $script:ready = $true; $state.Text = 'RUN confirmed | RPM ' + $Matches[2] + ' | BENCH TEST' }
                         else { $script:ready = $false; Send-Command 'STOP'; $state.Text = 'Unexpected RUN - STOP sent' }
                     }
+                } elseif ($message -eq 'ACK PROFILE TOYOTA_3ZZ_TEST') {
+                    if ($script:pendingProfile) {
+                        $script:pendingProfile = $false; $script:ready = $false; $script:wantsRun = $false
+                        $script:appliedRpm = 800; $rpm.Value = 800; $camPhase.Value = 0; $camWidth.Value = 2
+                        $camState.Text = 'Toyota test phase 0 / width 2; ECU phase unverified'
+                        Send-Command 'STATUS'
+                    }
+                } elseif ($message -match '^STATS CKP ([0-9]+) CMP ([0-9]+) D7 ([01]) D2 ([01])$') {
+                    $statsLabel.Text = 'SOFTWARE ONLY: CKP count ' + $Matches[1] + ' | CMP count ' + $Matches[2] +
+                        "`r`nPin logic snapshot: D7=" + $Matches[3] + ' D2=' + $Matches[4] + ' | Actual waveform/Vpp unmeasured'
                 } elseif ($message -match '^(?:ACK )?SENSOR (TPS|MAP|MAF) ([0-9]+) mV$') {
                     # Sensor acknowledgement never changes pending/applied RPM.
                     $sensor = $Matches[1]; $value = [int]$Matches[2]
@@ -282,6 +327,7 @@ $timer.Add_Tick({
                     if ($script:pendingRpm -gt 0) { $script:appliedRpm = $script:pendingRpm; $script:pendingRpm = 0 }
                 } elseif ($message -like 'STOP: *' -or $message -like 'ERROR*' -or $message -like 'Mega bench test only.*') {
                     $script:wantsRun = $false
+                    $script:pendingProfile = $false
                     Clear-SensorRequests
                     if ($message -like 'Mega bench test only.*' -and $script:initialized) {
                         $script:ready = $false; $script:pendingRpm = 0; $script:appliedRpm = 0; Send-Command 'STOP'; Send-Command 'SENSOR OFF'; Send-Command 'STATUS'
@@ -300,6 +346,7 @@ $timer.Add_Tick({
         if ($script:initialized) {
             if (($now - $script:lastRx).TotalSeconds -gt 3.5) { throw 'No valid STATUS response for 3.5s; stopping and disconnecting.' }
             if ($script:pendingRpm -gt 0 -and ($now - $script:pendingAt).TotalSeconds -gt 2) { throw 'RPM acknowledgement timeout.' }
+            if ($script:pendingProfile -and ($now - $script:profileRequestedAt).TotalSeconds -gt 2) { throw 'Profile acknowledgement timeout.' }
             foreach ($sensor in @($script:pendingSensors.Keys)) {
                 if (($now - $script:pendingSensors[$sensor].At).TotalSeconds -gt 2) { throw ('Sensor acknowledgement timeout: ' + $sensor) }
             }
@@ -319,4 +366,4 @@ $timer.Add_Tick({
 })
 $form.Add_FormClosing({ $timer.Stop(); Close-Serial 'Control panel closing.' })
 try { Refresh-Ports; $timer.Start(); $null = $form.ShowDialog() }
-finally { $timer.Stop(); $timer.Dispose(); Close-Serial 'Control panel closed.'; $form.Dispose() }
+finally { $timer.Stop(); $timer.Dispose(); Close-Serial 'Control panel closed.'; $tooltips.Dispose(); $form.Dispose() }
