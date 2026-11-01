@@ -52,6 +52,11 @@ try {
     if (!$timeoutReply.Contains('STOP: START timeout')) { throw 'Crank timeout not observed' }
     Assert-Reply 'STATUS' 'STOP 800 RPM; CAM DISABLED; ECU UNVERIFIED'
     Assert-Reply 'SENSOR OFF' 'SENSOR OFF'
+    # Regression: START must enable CMP even without loading a vehicle preset.
+    Assert-Reply 'CAM OFF' 'ACK CAM OFF'
+    Assert-Reply 'START' 'BENCH TEST'
+    Assert-Reply 'STATUS' 'RUN 800 RPM; CAM TEST ENABLED; ECU UNVERIFIED'
+    Assert-Reply 'STOP' 'STOPPED'
     Assert-Reply 'PROFILE TOYOTA_3ZZ_TEST' 'ACK PROFILE TOYOTA_3ZZ_TEST'
     Assert-Reply 'CONFIG' 'CONFIG PINS CKP 7 CMP 2 TPS 5 MAP 6 MAF 8'
     Assert-Reply 'START' 'BENCH TEST'

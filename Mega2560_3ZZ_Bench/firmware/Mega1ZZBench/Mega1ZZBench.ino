@@ -1,5 +1,5 @@
 /* Mega 2560 bench waveform bring-up ONLY.
- * D7: 36-slot / 2 missing CKP logic test. D2: optional CMP test pulse.
+ * D7: 36-slot / 2 missing CKP test. D2: CMP paired automatically on START.
  * D5/D6/D8: TPS/MAP/MAF test PWM, NOT DAC voltages or ECU-ready outputs.
  * Both pins are high impedance during reset/bootloader. Interface must default off.
  * Not an ECU-qualified 89661-02860 profile. No CAM phase is assumed.
@@ -21,7 +21,7 @@ volatile uint8_t halfSlot = 0;
 volatile bool running = false;
 volatile bool camEnabled = false;
 volatile uint8_t camPhase = 0;
-volatile uint8_t camWidth = 1;
+volatile uint8_t camWidth = 2;
 volatile uint32_t ckpEdges = 0;
 volatile uint32_t cmpEdges = 0;
 volatile uint16_t pendingTop = 0;
@@ -63,6 +63,7 @@ void sensorsOff() {
 void stopOutput() {
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     running = false;
+    camEnabled = false;
     TIMSK1 &= ~_BV(OCIE1A);
     PORTH &= ~_BV(PH4);
     PORTE &= ~_BV(PE4);
@@ -144,6 +145,8 @@ void command() {
   } else if (!strcmp(line, "START")) {
     lastStart = millis();
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      // CKP and CMP always run together, including after reset or CAM OFF.
+      camEnabled = true;
       if (!running) {
         halfSlot = 0; TCNT1 = 0;
         ckpEdges = 0; cmpEdges = 0;

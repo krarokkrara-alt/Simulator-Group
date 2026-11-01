@@ -75,7 +75,7 @@ $rpmSlider.SmallChange = 100; $rpmSlider.LargeChange = 500; $rpmSlider.TickFrequ
 $rpmSlider.SetBounds(600,270,208,52); $form.Controls.Add($rpmSlider)
 $loadProfile = Add-Button 'Load Toyota CKP+CMP test' 596 278 212 42
 $tooltips = New-Object System.Windows.Forms.ToolTip
-$tooltips.SetToolTip($start,'START enables output and sends keepalive every second. Firmware stops after 5 seconds without START. Not a hardware safety circuit.')
+$tooltips.SetToolTip($start,'START enables CKP D7 and CMP D2 together, nominal 0-Vcc (~5V). Keepalive every second; stops after 5s without START. Actual Vpp unmeasured.')
 $tooltips.SetToolTip($pins,'CKP/CMP nominal logic 0-5 V (~5 Vpp) into a high-impedance instrument. Actual amplitude must be measured; no direct ECU connection.')
 $tooltips.SetToolTip($loadProfile,'Explicit bench preset: RPM 800, CAM phase 0, width 2. Loading does not START output. CAM phase is not validated for this ECU.')
 $hint = Add-Label 'Connect, wait for STOP, load test preset or Apply RPM, then START. Reconnect never starts output. Measure actual Vpp with a high-impedance scope.' 24 332 780 42
@@ -119,9 +119,9 @@ $null = Add-Label 'Width (1-12, each 5 crank degrees)' 350 48 320 24 $camTab
 $camPhase = New-Object System.Windows.Forms.NumericUpDown
 $camPhase.Minimum = 0; $camPhase.Maximum = 143; $camPhase.SetBounds(8,78,150,30); $camTab.Controls.Add($camPhase)
 $camWidth = New-Object System.Windows.Forms.NumericUpDown
-$camWidth.Minimum = 1; $camWidth.Maximum = 12; $camWidth.Value = 1; $camWidth.SetBounds(350,78,150,30); $camTab.Controls.Add($camWidth)
+$camWidth.Minimum = 1; $camWidth.Maximum = 12; $camWidth.Value = 2; $camWidth.SetBounds(350,78,150,30); $camTab.Controls.Add($camWidth)
 $camApply = Add-Button 'Apply CAM test' 8 124 170 34 $camTab
-$camOff = Add-Button 'CAM OFF' 190 124 140 34 $camTab
+$camOff = Add-Button 'Disarm until START' 190 124 140 34 $camTab
 $camState = Add-Label 'CAM configuration unconfirmed' 350 126 400 50 $camTab
 $log = New-Object System.Windows.Forms.TextBox
 $log.Multiline = $true; $log.ReadOnly = $true; $log.ScrollBars = 'Vertical'
@@ -266,14 +266,14 @@ $camApply.Add_Click({
     } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
 $camOff.Add_Click({
-    try { Send-Command 'CAM OFF'; $camState.Text = 'CAM OFF requested...'; Write-Log 'TX CAM OFF' }
+    try { Send-Command 'CAM OFF'; $camState.Text = 'Disarmed; next START enables CMP with CKP'; Write-Log 'TX CAM OFF (next START enables CMP)' }
     catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
 $start.Add_Click({
     try {
         $script:wantsRun = $true; $script:lastKeepalive = [datetime]::UtcNow
         Send-Command 'START'; Send-Command 'STATUS'
-        $state.Text = 'START requested - waiting for RUN status'; Write-Log 'TX START'; Update-Controls
+        $state.Text = 'START CKP + CMP requested - waiting for RUN status'; Write-Log 'TX START (CKP D7 + CMP D2)'; Update-Controls
     } catch { Close-Serial ('ERROR: ' + $_.Exception.Message) }
 })
 $stop.Add_Click({
@@ -346,7 +346,7 @@ $timer.Add_Tick({
                 } elseif ($message -eq 'STOPPED') {
                     Clear-SensorRequests 'PWM OFF (STOP confirmed)'
                 } elseif ($message -match '^(?:ACK )?CAM OFF$') {
-                    $camState.Text = 'CAM OFF confirmed'
+                    $camState.Text = 'CMP disarmed while stopped; START enables it'
                 } elseif ($message -match '^(?:ACK )?CAM ([0-9]+) ([0-9]+)') {
                     $camState.Text = 'CAM test: phase ' + $Matches[1] + ', width ' + $Matches[2] + '; unverified'
                 } elseif ($message -eq 'RPM SET') {
