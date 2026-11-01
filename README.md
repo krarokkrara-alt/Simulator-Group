@@ -31,3 +31,11 @@
 
 สถานะ: ตรวจโครงสร้างโค้ดแล้ว แต่ยังไม่ได้ยืนยันการ Compile ใน Arduino IDE,
 ยังไม่ได้วัดด้วย Oscilloscope และยังไม่ได้ทดสอบกับ ECU จริง
+
+## Arduino Mega 2560 — Toyota 3ZZ-FE Bench
+
+เพิ่มชุดทดสอบ Mega สำหรับ ECU 89661-02860 พร้อมหน้าจอ Windows, CKP/CAM test และ TPS/MAF/MAP PWM:
+
+[`Mega2560_3ZZ_Bench/README.md`](Mega2560_3ZZ_Bench/README.md)
+
+ผ่านการคอมไพล์ อัปโหลด COM4 และทดสอบคำสั่ง Serial/STOP/timeout แล้ว ยังไม่พร้อมต่อ ECU โดยตรง ต้องมีวงจรแปลงสัญญาณและยืนยันเฟส CAM/รูปคลื่นก่อน

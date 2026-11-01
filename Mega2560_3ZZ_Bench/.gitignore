@@ -1,0 +1,4 @@
+tools/
+logs/
+build/
+*.tmp
