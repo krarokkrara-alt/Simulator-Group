@@ -1,0 +1,350 @@
+{
+  "scope": [
+    "Toyota",
+    "Lexus",
+    "Honda",
+    "Nissan",
+    "Mitsubishi",
+    "Subaru",
+    "Mazda",
+    "Suzuki",
+    "Isuzu",
+    "Daihatsu"
+  ],
+  "note": "Inventory only, not proof of OEM waveform support. Counts do not define width or CKP/CMP phase. Firmware unchanged.",
+  "profiles": [
+    {
+      "brand": "Toyota",
+      "engine": "1JZ/2JZ crank-sensor non-VVTi variants",
+      "source": "https://support.haltech.com/portal/en/kb/articles/2jz-1jz-engine",
+      "sourceCkpPer720": 24,
+      "sourceCmpPer720": 1,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "1JZ/2JZ VVTi crank-sensor variants",
+      "source": "https://support.haltech.com/portal/en/kb/articles/2jz-1jz-engine",
+      "sourceCkpPer720": 68,
+      "sourceCmpPer720": 3,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "2GR-FKS - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "A25A-FKS - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "M20A-FKS - RAV4 / Harrier source variants",
+      "source": "https://global.toyota/en/newsroom/toyota/27541875.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "A25A-FXS - RAV4 Hybrid source variant",
+      "source": "https://global.toyota/en/newsroom/toyota/27541875.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "1GD-FTV - GD turbo-diesel family",
+      "source": "https://global.toyota/en/detail/8348091",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "2GD-FTV - GD turbo-diesel family",
+      "source": "https://global.toyota/en/detail/8348091",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "B58 - Supra MKV / A90 family",
+      "source": "https://ecutek.atlassian.net/wiki/spaces/SUPPORT/pages/170557464",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Toyota",
+      "engine": "FA20 - GT86",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-subaru_toyota_fa20.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Lexus",
+      "engine": null,
+      "source": null,
+      "status": "No existing catalogue entry; primary waveform data required"
+    },
+    {
+      "brand": "Honda",
+      "engine": "K20A/K24A DC5/EP3 and K20Z1 cited applicability",
+      "source": "https://support.haltech.com/portal/en/kb/articles/thomas-te",
+      "sourceCkpPer720": 26,
+      "sourceCmpPer720": 5,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Honda",
+      "engine": "K20C1 - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Honda",
+      "engine": "L15B7 - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Honda",
+      "engine": "L15A7 - i-VTEC (CKP-only)",
+      "source": "https://support.haltech.com/portal/en/kb/articles/l-engine",
+      "sourceCkpPer720": 116,
+      "sourceCmpPer720": 3,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Nissan",
+      "engine": "SR20 S13/S14/S15 CAS direct-fire variants",
+      "source": "https://support.haltech.com/portal/en/kb/articles/sr20-trigger",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Nissan",
+      "engine": "VR30DDTT - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Nissan",
+      "engine": "VQ37VHR - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Nissan",
+      "engine": "HR16DE - Tiida C11",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-nissan_tiida_c11_hr16de.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Nissan",
+      "engine": "VK56VD - Patrol / Armada / Titan source variants",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-nissan_vk56vd.html",
+      "sourceCkpPer720": 64,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mitsubishi",
+      "engine": "4G63 DOHC turbo EVO1-3 / Galant VR4 / Eclipse CAS",
+      "source": "https://support.haltech.com/portal/en/kb/articles/4g63-engine",
+      "sourceCkpPer720": 4,
+      "sourceCmpPer720": 2,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mitsubishi",
+      "engine": "4G63 EVO4-8 separate crank/cam",
+      "source": "https://support.haltech.com/portal/en/kb/articles/4g63-engine",
+      "sourceCkpPer720": 4,
+      "sourceCmpPer720": 2,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mitsubishi",
+      "engine": "4G63 EVO9 MIVEC",
+      "source": "https://support.haltech.com/portal/en/kb/articles/4g63-engine",
+      "sourceCkpPer720": 4,
+      "sourceCmpPer720": 2,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mitsubishi",
+      "engine": "EVO X - exact engine variant pending",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-mitsubishi_evo_x.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mitsubishi",
+      "engine": "3A92",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-mitsubishi_3a92.html",
+      "sourceCkpPer720": 64,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Subaru",
+      "engine": "EJ series with 6/7 wheels; variant/year unspecified",
+      "source": "https://megasquirt.co.uk/doc/pdf/MS3XV357_Hardware-1.3.pdf",
+      "sourceCkpPer720": 12,
+      "sourceCmpPer720": 7,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Subaru",
+      "engine": "4-cylinder stock 36-2-2-2 variants; engine/year unspecified",
+      "source": "https://megasquirt.co.uk/doc/pdf/MS3XV357_Hardware-1.3.pdf",
+      "sourceCkpPer720": 60,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Subaru",
+      "engine": "FA20DIT - WRX 2019",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-subaru_wrx_fa20dit.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Subaru",
+      "engine": "FA20 - BRZ",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-subaru_toyota_fa20.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mazda",
+      "engine": "MX5/Miata NB2 BP-Z3/BP-VE VVT",
+      "source": "https://support.haltech.com/portal/en/kb/articles/01-05-nb2-1-8l-w-vvt-bp-z3-bp-ve",
+      "sourceCkpPer720": 8,
+      "sourceCmpPer720": 3,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mazda",
+      "engine": "LF-VE NC MX5 article scope",
+      "source": "https://support.haltech.com/portal/en/kb/articles/mazda-lf-mzr-engine",
+      "sourceCkpPer720": 60,
+      "sourceCmpPer720": 6,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mazda",
+      "engine": "Skyactiv-G - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Mazda",
+      "engine": "Skyactiv-X - exact vehicle/year pending",
+      "source": "https://www.maxxecu.com/webhelp/information-direct_injection.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Suzuki",
+      "engine": "Swift with 12-tooth VR distributor; engine/year unspecified",
+      "source": "https://megasquirt.co.uk/doc/pdf/MS3XV357_Hardware-1.3.pdf",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Suzuki",
+      "engine": "Vitara 2.0; year unspecified",
+      "source": "https://megasquirt.co.uk/doc/pdf/MS3XV357_Hardware-1.3.pdf",
+      "sourceCkpPer720": 22,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Suzuki",
+      "engine": "K12B - Swift 2012-2017",
+      "source": "https://www.maxxecu.com/webhelp/trigger_system-suzuki_swift_k12b.html",
+      "sourceCkpPer720": null,
+      "sourceCmpPer720": null,
+      "generatedCmpPer720": 0,
+      "status": "CMP not implemented; exact edges/phase/polarity required"
+    },
+    {
+      "brand": "Isuzu",
+      "engine": null,
+      "source": null,
+      "status": "No existing catalogue entry; primary waveform data required"
+    },
+    {
+      "brand": "Daihatsu",
+      "engine": null,
+      "source": null,
+      "status": "No existing catalogue entry; primary waveform data required"
+    }
+  ]
+}

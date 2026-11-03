@@ -1,0 +1,20 @@
+name: CKP CMP edge-table checks
+on:
+  pull_request:
+    paths:
+      - 'Mytech_simulator_v1.2/development/ESP32_WiFi_StandAlone_Test/EdgeWaveform.h'
+      - 'Mytech_simulator_v1.2/development/tests/edge_waveform_tests.cpp'
+      - '.github/workflows/ckp-cmp-edge-tests.yml'
+  push:
+    branches: ['codex/ckp-cmp-edge-waveforms']
+permissions:
+  contents: read
+jobs:
+  static-assertions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile synthetic waveform and validation assertions
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Werror -c Mytech_simulator_v1.2/development/tests/edge_waveform_tests.cpp -o /tmp/edge-waveform-tests.o
+          g++ -std=c++17 -Wall -Wextra -Werror -c Mytech_simulator_v1.2/development/tests/edge_waveform_qc_tests.cpp -o /tmp/edge-waveform-qc-tests.o
